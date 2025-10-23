@@ -17,6 +17,20 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+# Import views
+from . import views
+# from . views import *
+
+
+# Router (URL) MatchMyCV
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('', views.index),
+    path('tentang-kami/', views.aboutUs),
+    path('faq/', views.faq),
+    path('analisis-cv/', views.analisisCV),
+    path('analisis-cv/hasil-rekomendasi/', views.hasilRekomendasi),
+    path('login/', views.login),
+    path('register/', views.register),
+
+    # path('admin/', admin.site.urls),
 ]

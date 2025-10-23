@@ -1,1 +1,45 @@
-/env
+# Virtual environment
+env/
+venv/
+ENV/
+.venv/
+
+# Django stuff
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+*.log
+
+# IDE & OS files
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Python cache & build
+*.egg-info/
+build/
+dist/
+
+# Environment & credentials
+.env
+*.env
+.env.local
+.env.production
+.env.development
+
+# Pytest / coverage
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.pytest_cache/
+
+# VSCode workspace cache
+.history/
