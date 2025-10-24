@@ -1,0 +1,28 @@
+/*! tailwindcss v4.1.16 | MIT License | https://tailwindcss.com */
+.collapse {
+  visibility: collapse;
+}
+.static {
+  position: static;
+}
+.container {
+  width: 100%;
+}
+.me-auto {
+  margin-inline-end: auto;
+}
+.mt-auto {
+  margin-top: auto;
+}
+.block {
+  display: block;
+}
+.text-\[10px\] {
+  font-size: 10px;
+}
+.text-\[50px\] {
+  font-size: 50px;
+}
+.text-\[400px\] {
+  font-size: 400px;
+}
