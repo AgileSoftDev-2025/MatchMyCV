@@ -11,8 +11,6 @@ __pycache__/
 *.pyd
 *.sqlite3
 db.sqlite3
-media/
-staticfiles/
 *.log
 
 # IDE & OS files

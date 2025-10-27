@@ -1,7 +1,131 @@
-{% extends "base.html" %}
-{% block title %}Beranda | MatchMyCV{% endblock %}
-{% block content %}
-  <div class="p-5 bg-light rounded-3">
-    <h1 class="fw-bold">Register</h1>
-  </div>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MatchMyCV - Sign Up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-12">
+    <main class="w-full max-w-sm sm:max-w-md lg:max-w-lg">
+        <section class="bg-white rounded-xl shadow-sm p-6 sm:p-8 lg:p-10 border border-gray-100">
+            
+            <!-- Logo -->
+            <div class="flex items-center justify-center mb-6 sm:mb-8">
+                <!-- Solusi untuk masalah logo -->
+                <!-- Opsi 1: Gunakan gambar jika tersedia -->
+                <img src="{% static 'images/logo-matchmycv.png' %}" alt="MatchMyCV" class="h-10" />
+                
+                <!-- Opsi 2: Buat logo dengan teks (fallback jika gambar tidak muncul) -->
+                <!-- div class="text-2xl font-bold text-gray-900 tracking-tight">MatchMyCV</div -->
+            </div>
+
+            <!-- Heading -->
+            <h1 class="text-center text-gray-900 font-semibold text-xl sm:text-2xl mb-6">Create your account</h1>
+
+            <!-- Form -->
+            <form class="space-y-5" autocomplete="on" novalidate>
+                <!-- Name Field -->
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1.5">Name</label>
+                    <input type="text" id="name" name="name" required
+                           class="block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition" 
+                           placeholder="Your full name" aria-label="Full name" />
+                </div>
+
+                <!-- Email Field -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                    <input type="email" id="email" name="email" required
+                           class="block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition"
+                           placeholder="you@example.com" aria-label="Email address" />
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+                    <div class="relative">
+                        <input type="password" id="password" name="password" required
+                               class="block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 pr-12 text-sm placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition"
+                               placeholder="Create a password" aria-label="Password" />
+                        <button type="button" id="togglePwd" aria-label="Toggle password visibility"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-gray-700 focus:outline-none">
+                            <!-- Eye icon -->
+                            <svg id="eye-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M3 3l3.59 3.59M10.7 10.7a3 3 0 104.24 4.24M2.46 12C3.73 7.94 7.52 5 12 5c4.48 0 8.27 2.94 9.54 7-1.27 4.06-5.06 7-9.54 7-1.48 0-2.88-.34-4.13-.94"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="mt-2 text-xs text-gray-500">Use at least 8 characters, with a mix of letters and numbers.</p>
+                </div>
+
+                <!-- Register Button -->
+                <div class="pt-2">
+                    <button type="submit" class="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-shadow">
+                        Register
+                    </button>
+                </div>
+
+                <!-- Terms -->
+                <div class="pt-2">
+                    <p class="text-center text-sm text-gray-600">By creating an account, you agree to MatchMyCV's
+                        <a href="#" class="text-blue-600 hover:underline">Terms of Service</a>.
+                    </p>
+                </div>
+
+                <!-- Divider -->
+                <div class="mt-6 border-t border-gray-200"></div>
+
+                <!-- Sign In Link -->
+                <p class="text-center text-sm text-gray-700 mt-6">
+                    Already have an account?
+                    <a href="#" class="text-blue-600 font-medium hover:underline">Sign in</a>
+                </p>
+            </form>
+        </section>
+    </main>
+
+    <script>
+        // Password toggle functionality
+        const toggleBtn = document.getElementById('togglePwd');
+        const pwdInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eye-icon');
+
+        toggleBtn.addEventListener('click', () => {
+            const isHidden = pwdInput.type === 'password';
+            pwdInput.type = isHidden ? 'text' : 'password';
+            
+            // Change icon based on password visibility
+            if (isHidden) {
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M2.46 12C3.73 7.94 7.52 5 12 5c4.48 0 8.27 2.94 9.54 7-1.27 4.06-5.06 7-9.54 7-4.48 0-8.27-2.94-9.54-7z"/>`;
+                toggleBtn.setAttribute('aria-pressed', 'true');
+            } else {
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M3 3l3.59 3.59M10.7 10.7a3 3 0 104.24 4.24M2.46 12C3.73 7.94 7.52 5 12 5c4.48 0 8.27 2.94 9.54 7-1.27 4.06-5.06 7-9.54 7-1.48 0-2.88-.34-4.13-.94"/>`;
+                toggleBtn.setAttribute('aria-pressed', 'false');
+            }
+        });
+
+        // Allow keyboard toggle
+        toggleBtn.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
