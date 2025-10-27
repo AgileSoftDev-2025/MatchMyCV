@@ -1,9 +1,9 @@
-!pip install pytesseract pdf2image pillow spacy
-!apt install tesseract-ocr
-!pip install transformers
-!pip install pdfplumber
-!pip install tabulate
-!pip install pymupdf
+pip install pytesseract pdf2image pillow spacy
+apt install tesseract-ocr
+pip install transformers
+pip install pdfplumber
+pip install tabulate
+pip install pymupdf
 
 import fitz
 from google.colab import files
