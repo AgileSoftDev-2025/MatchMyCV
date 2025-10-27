@@ -1,37 +1,39 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-<div class="w-full max-w-md mx-auto p-4">
-  <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-lg p-8">
+<div class="min-h-screen flex items-center justify-center bg-white/90 p-4">
+  <div class="w-full max-w-sm sm:max-w-md md:max-w-lg bg-gradient-to-br from-blue-100 to-indigo-100 backdrop-blur-md rounded-2xl shadow-xl p-6 sm:p-8 transition-all duration-300">
+
     <!-- Logo -->
-    <div class="flex items-center justify-center mb-8">
-      <img src="{% static 'images/Logo MatchMyCV.png' %}" alt="MatchMyCV Logo" class="w-30 h-20 object-contain">
+    <div class="flex items-center justify-center mb-6 sm:mb-8">
+      <img src="{% static 'images/Logo MatchMyCV.png' %}" alt="MatchMyCV Logo" class="w-28 sm:w-36 h-auto object-contain">
     </div>
 
     <!-- Form -->
     <form method="post" action="">
       {% csrf_token %}
+
       <!-- Email -->
       <div class="mb-5">
-        <label for="email" class="block text-gray-800 font-medium mb-2">Email</label>
+        <label for="email" class="block text-gray-800 font-medium mb-2 text-sm sm:text-base">Email</label>
         <input
           type="email"
           id="email"
           name="email"
-          class="w-full px-4 py-3 rounded-lg border-2 border-blue-300 focus:border-blue-500 focus:outline-none bg-white transition-colors"
+          class="w-full px-4 py-2 sm:py-3 rounded-lg border-2 border-blue-300 focus:border-blue-500 focus:outline-none bg-white text-sm sm:text-base transition-colors"
           required
         >
       </div>
 
       <!-- Password -->
       <div class="mb-5">
-        <label for="password" class="block text-gray-800 font-medium mb-2">Password</label>
+        <label for="password" class="block text-gray-800 font-medium mb-2 text-sm sm:text-base">Password</label>
         <div class="relative">
           <input
             type="password"
             id="password"
             name="password"
-            class="w-full px-4 py-3 rounded-lg border-2 border-blue-300 focus:border-blue-500 focus:outline-none bg-white transition-colors pr-12"
+            class="w-full px-4 py-2 sm:py-3 rounded-lg border-2 border-blue-300 focus:border-blue-500 focus:outline-none bg-white pr-10 sm:pr-12 text-sm sm:text-base transition-colors"
             required
           >
           <button
@@ -40,7 +42,7 @@
             class="absolute right-3 top-1/2 -translate-y-1/2 text-blue-600 hover:text-blue-700 transition-colors"
             aria-label="Toggle password visibility"
           >
-            <svg id="eye-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg id="eye-icon" class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
             </svg>
@@ -48,21 +50,16 @@
         </div>
       </div>
 
-      <!-- Forgot -->
-
-
       <!-- Submit -->
       <button
         type="submit"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 sm:py-3 rounded-lg transition-colors shadow-md hover:shadow-lg text-sm sm:text-base"
       >
         Sign In
       </button>
 
       <!-- Divider -->
-      <div class="my-6 border-t border-gray-300"></div>
-
-      <!-- Register -->
+      <div class="my-5 sm:my-6 border-t border-gray-300"></div>
 
     </form>
   </div>
