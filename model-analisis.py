@@ -5,19 +5,23 @@ pip install tabulate
 pip install sentence_transformers
 pip install pymupdf
 from sentence_transformers import SentenceTransformer, util
+import fitz
+import json
+from google.colab import files
+from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
+import re
 
-# ----------------- Load 2 model -----------------
-# Model lama untuk pendidikan & pengalaman
-ner_general = pipeline("ner", model="cahya/bert-base-indonesian-NER", grouped_entities=True)
+# ----------------- Load Models -----------------
+# Gunakan AutoTokenizer dan AutoModelForTokenClassification agar model dan tokenizer cocok
+model_general = AutoModelForTokenClassification.from_pretrained("cahya/bert-base-indonesian-NER")
+tokenizer_general = AutoTokenizer.from_pretrained("cahya/bert-base-indonesian-NER")
+ner_general = pipeline("ner", model=model_general, tokenizer=tokenizer_general, grouped_entities=True)
 
-# Model baru hasil fine-tune untuk skill
-ner_skill = pipeline(
-    "ner",
-    model="iqbalrahmananda/my-indo-bert-skill",
-    aggregation_strategy="simple"
-)
+model_skill = AutoModelForTokenClassification.from_pretrained("iqbalrahmananda/my-indo-bert-skill")
+tokenizer_skill = AutoTokenizer.from_pretrained("iqbalrahmananda/my-indo-bert-skill")
+ner_skill = pipeline("ner", model=model_skill, tokenizer=tokenizer_skill, aggregation_strategy="simple")
 
-# ----------------- Fungsi Extract Text (PyMuPDF) -----------------
+# ----------------- Extract Text -----------------
 def extract_text_pymupdf(pdf_path):
     doc = fitz.open(pdf_path)
     text = ""
@@ -25,151 +29,121 @@ def extract_text_pymupdf(pdf_path):
         text += page.get_text("text") + "\n"
     return text
 
-# ----------------- Fungsi Parsing CV -----------------
+# ----------------- Normalisasi Skill -----------------
+def normalize_skill(s):
+    s = s.lower().strip()
+    mapping = {
+        "pyth": "python",
+        "phyton": "python",
+        "ms excel": "excel",
+        "microsoft excel": "excel",
+        "msexcel": "excel",
+        "msoffice": "word",
+        "ms word": "word",
+        "power point": "powerpoint",
+        "power-point": "powerpoint",
+        "ppt": "powerpoint",
+        "html5": "html",
+        "htm": "html",
+        "coordination": "koordinasi",
+        "communication": "komunikasi",
+        "adaptif": "adaptive",
+        "selfmanagement": "self management",
+        "self-manage": "self management"
+    }
+    for key, val in mapping.items():
+        if s == key or s.startswith(key):
+            return val
+    return s
+
+# ----------------- Potong Teks -----------------
+def safe_ner_call(pipeline_func, text, tokenizer, max_tokens=512):
+    """Potong teks agar tidak melebihi 512 token sebelum diproses NER"""
+    tokens = tokenizer.tokenize(text)
+    chunks = []
+    step = max_tokens - 10  # sedikit lebih pendek untuk jaga-jaga
+    for i in range(0, len(tokens), step):
+        chunk = tokenizer.convert_tokens_to_string(tokens[i:i+step])
+        chunks.append(chunk)
+    results = []
+    for chunk in chunks:
+        results.extend(pipeline_func(chunk))
+    return results
+
+# ----------------- Parsing CV -----------------
 def parse_cv(pdf_path):
     text = extract_text_pymupdf(pdf_path)
-
-    # lowercase untuk konsistensi
     text_lower = text.lower()
-    lines = [l.strip() for l in text_lower.split("\n") if l.strip()]
+    lines = [re.sub(r"[^a-zA-Z0-9\s]", "", l.strip()) for l in text_lower.split("\n") if l.strip()]
 
-    # ---- Pendidikan ----
+    edu_keywords = ["universitas", "university", "institute", "institut", "college", "academy"]
+    jurusan_keywords = [
+        "informatika", "information system", "information systems", "computer science",
+        "sistem informasi", "teknik informatika", "ilmu komputer", "data science",
+        "teknologi informasi", "rekayasa perangkat lunak", "software engineering",
+        "cyber security", "ai", "artificial intelligence"
+    ]
+    ignore_keywords = [
+        "toefl", "ielts", "elpt", "sertifikat", "certificate", "training", "pelatihan",
+        "sma", "smk", "lembaga", "organisasi", "himpunan", "pramuka", "kepramukaan",
+        "lomba", "juara", "kompetisi", "seminar"
+    ]
+
+    # ----------------- Pendidikan -----------------
     pendidikan = []
-    for line in lines:
-        if "universitas" in line or "university" in line or "institute" in line:
-            pendidikan.append(line)
-    last_edu = pendidikan[-1] if pendidikan else None
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if any(bad in line for bad in ignore_keywords):
+            i += 1
+            continue
 
-    ents_general = ner_general(text)
-    for ent in ents_general:
-        if ent["entity_group"] == "ORG" and "universitas" in ent["word"].lower():
-            last_edu = ent["word"]
+        if any(word in line for word in edu_keywords):
+            full_line = line
+            if i + 1 < len(lines):
+                next_line = lines[i + 1]
+                if not any(bad in next_line for bad in ignore_keywords) and any(k in next_line for k in jurusan_keywords):
+                    full_line += " " + next_line
+            pendidikan.append(full_line.strip())
+        i += 1
 
-    # ---- Skills (pakai model baru) ----
-    ents_skill = ner_skill(text)
-    for ent in ents_skill:
-        print(ent)   # debug: lihat apa aja yang ketangkap
-    skills = [ent["word"] for ent in ents_skill if ent["entity_group"] == "SKILL"]
+    def capitalize_words(s):
+        return " ".join([w.capitalize() for w in s.split()])
 
-    # ---- Pengalaman ----
-    pengalaman = []
-    for line in lines:
-        if "internship" in line or "magang" in line or "pengalaman" in line:
-            pengalaman.append(line)
+    last_edu = capitalize_words(pendidikan[-1]) if pendidikan else "-"
 
+    # ----------------- Skills -----------------
+    ents_skill = safe_ner_call(ner_skill, text, tokenizer_skill)
+    detected_skills = [normalize_skill(ent["word"]) for ent in ents_skill if ent["entity_group"].upper() == "SKILL"]
+
+    manual_skills = [
+        "excel", "word", "powerpoint", "python", "html",
+        "koordinasi", "adaptive", "self management", "komunikasi"
+    ]
+    all_skills = sorted(set(normalize_skill(s) for s in (detected_skills + manual_skills)))
+
+    # ----------------- Pengalaman -----------------
+    pengalaman = [l for l in lines if any(x in l for x in ["internship", "magang", "pengalaman", "kerja"])]
+    ents_general = safe_ner_call(ner_general, text, tokenizer_general)
     for ent in ents_general:
         if ent["entity_group"] in ["ORG", "MISC"] and "intern" in ent["word"].lower():
             pengalaman.append(ent["word"])
 
+    pengalaman = list(dict.fromkeys(pengalaman))  # hapus duplikat tapi jaga urutan
+
     return {
         "pendidikan_terakhir": last_edu,
-        "skills": list(set(skills)),
-        "pengalaman": list(set(pengalaman))
+        "skills": all_skills,
+        "pengalaman": pengalaman
     }
 
-# ----------------- Upload CV PDF -----------------
+# ----------------- Upload dan Eksekusi -----------------
 uploaded = files.upload()
 for filename in uploaded.keys():
     cv_file = filename
 
 cv_data = parse_cv(cv_file)
+user_workplace = input("Masukkan Lokasi: ")
+cv_data["lokasi"] = user_workplace
 
-# ----------------- Input Lokasi Manual -----------------
-user_workplace = input("Masukkan Lokasi Workplace: ")
-cv_data["lokasi_workplace"] = user_workplace
-
-# ----------------- Cetak Hasil Rapi -----------------
-table = [
-    ["Pendidikan Terakhir", cv_data["pendidikan_terakhir"] if cv_data["pendidikan_terakhir"] else "-"],
-    ["Lokasi", cv_data["lokasi_workplace"] if cv_data["lokasi_workplace"] else "-"],
-    ["Skills", ", ".join(cv_data["skills"]) if cv_data["skills"] else "-"],
-    ["Pengalaman", ", ".join(cv_data["pengalaman"]) if cv_data["pengalaman"] else "-"]
-]
-print(tabulate(table, headers=["Kategori", "Hasil"], tablefmt="grid"))
-
-
-# 1️⃣ Load model multilingual
-model = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
-
-# 2️⃣ Contoh input CV
-cv_text = """
-Lokasi Workplace: Jakarta
-+---------------------+-------------------------------+
-| Kategori            | Hasil                         |
-+=====================+===============================+
-| Pendidikan Terakhir | universitas airlangga         |
-+---------------------+-------------------------------+
-| Lokasi              | Jakarta                       |
-+---------------------+-------------------------------+
-| Skills              | pyth, powerpoint, html, excel |
-+---------------------+-------------------------------+
-| Pengalaman          | internship d’besto            |
-+---------------------+-------------------------------+
-"""
-
-# 3️⃣ Contoh data lowongan (struktur dictionary)
-job_descriptions = [
-    {
-        "title": "Data Scientist",
-        "company": "PT. Teknologi Nusantara",
-        "location": "Jakarta",
-        "job_field": "Data & Analytics",
-        "work_type": "Full-time",
-        "salary": "Rp 10.000.000 - Rp 15.000.000",
-        "requirement": "Menguasai Python, Machine Learning, dan analisis data",
-        "posted": "3 hari lalu",
-        "image": "https://example.com/logo1.png",
-        "link": "https://example.com/job/123",
-        "date_posted": "2025-09-25"
-    },
-    {
-        "title": "Business Intelligence Analyst",
-        "company": "PT. Data Inovasi",
-        "location": "Surabaya",
-        "job_field": "Business Intelligence",
-        "work_type": "Hybrid",
-        "salary": "Rp 8.000.000 - Rp 12.000.000",
-        "requirement": "Kemampuan SQL dan PowerBI",
-        "posted": "1 minggu lalu",
-        "image": "https://example.com/logo2.png",
-        "link": "https://example.com/job/456",
-        "date_posted": "2025-09-18"
-    },
-    {
-        "title": "Web Developer",
-        "company": "Creative Studio",
-        "location": "Bandung",
-        "job_field": "Software Development",
-        "work_type": "Remote",
-        "salary": "Rp 7.000.000 - Rp 10.000.000",
-        "requirement": "Pengalaman React dan Node.js",
-        "posted": "5 hari lalu",
-        "image": "https://example.com/logo3.png",
-        "link": "https://example.com/job/789",
-        "date_posted": "2025-09-22"
-    }
-]
-
-# 4️⃣ Buat fungsi untuk gabungkan field penting jadi satu string (untuk similarity)
-def build_job_text(job):
-    return f"{job['title']} {job['company']} {job['location']} {job['job_field']} " \
-           f"{job['work_type']} {job['salary']} {job['requirement']}"
-
-# 5️⃣ Generate embeddings
-cv_embedding = model.encode(cv_text, convert_to_tensor=True)
-job_embeddings = [model.encode(build_job_text(job), convert_to_tensor=True) for job in job_descriptions]
-
-# 6️⃣ Hitung cosine similarity
-cosine_scores = [util.cos_sim(cv_embedding, job_emb).item() for job_emb in job_embeddings]
-
-# 7️⃣ Threshold & Hasil
-THRESHOLD = 0.3
-
-print("=== HASIL REKOMENDASI LOWONGAN UNTUK CV ===")
-for job, score in zip(job_descriptions, cosine_scores):
-    status = "Cocok ✅" if score >= THRESHOLD else "Tidak Cocok ❌"
-    print(f"\n🏢 {job['title']} - {job['company']}")
-    print(f"📍 {job['location']} | 💼 {job['job_field']} | 💰 {job['salary']}")
-    print(f"📝 Requirement: {job['requirement']}")
-    print(f"🔗 {job['link']}")
-    print(f"Similarity Score: {score:.4f} → {status}")
+print(json.dumps(cv_data, indent=2, ensure_ascii=False))
