@@ -1,0 +1,46 @@
+"""
+URL configuration for matchmycv_website project.
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/5.2/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+"""
+# from django.contrib import admin
+# from django.urls import path
+
+# # Import views
+# from . import views
+# # from . views import *
+
+
+# # Router (URL) MatchMyCV
+# urlpatterns = [
+#     # path('', views.index),
+#     # path('tentang-kami/', views.aboutUs),
+#     # path('faq/', views.faq),
+#     # path('analisis-cv/', views.analisisCV),
+#     # path('analisis-cv/hasil-rekomendasi/', views.hasilRekomendasi),
+#     # path('login/', views.login),
+#     # path('register/', views.register),
+
+#     # path('admin/', admin.site.urls),
+# ]
+
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('', include('information_pages.urls')),
+    path('analisis-cv/', include(('cv_analyzer.urls', 'cv_analyzer'), namespace='cv_analyzer')),
+    path('', include(('user_authentication.urls', 'user_authentication'), namespace='user_authentication')),
+    # path('admin/', admin.site.urls),
+]
