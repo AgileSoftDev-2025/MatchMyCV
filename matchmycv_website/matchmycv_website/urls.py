@@ -42,5 +42,5 @@ urlpatterns = [
     path('', include('information_pages.urls')),
     path('analisis-cv/', include(('cv_analyzer.urls', 'cv_analyzer'), namespace='cv_analyzer')),
     path('', include(('user_authentication.urls', 'user_authentication'), namespace='user_authentication')),
-    # path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
 ]
