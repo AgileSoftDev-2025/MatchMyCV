@@ -13,18 +13,12 @@
       padding: 0;
     }
     
-    html {
-      font-size: 16px;
-    }
-    
-    body {
-      background: #fff;
-      color: #0f172a;
-    }
+    html { font-size: 16px; }
+    body { background: #e1edf7; color: #0f172a; }
 
     /* NAVBAR */
     .navbar {
-      height: 4rem;
+      height: 4.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -35,6 +29,11 @@
       background: #fff;
       z-index: 20;
     }
+    .navbar-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
     .brand img {
       height: 2.25rem;
       width: auto;
@@ -44,14 +43,18 @@
       gap: 1.75rem;
       align-items: center;
     }
-    .nav-links a {
+    .nav-links a, .sidebar-links a {
       color: #64748b;
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a {
       font-size: 0.9375rem;
     }
     .nav-links a:hover, .nav-links a.active {
       color: #2563eb;
+      font-weight: 700;
     }
     .profile-pic {
       width: 2.25rem;
@@ -59,6 +62,123 @@
       border-radius: 50%;
       border: 2px solid #e2e8f0;
     }
+
+    /* HAMBURGER MENU */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+      gap: 0.375rem;
+    }
+    .hamburger span {
+      width: 1.5rem;
+      height: 0.1875rem;
+      background: #64748b;
+      border-radius: 0.125rem;
+      transition: all 0.3s;
+    }
+    .hamburger.active span:nth-child(1) {
+      transform: rotate(45deg) translate(0.5rem, 0.5rem);
+    }
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+    .hamburger.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(0.5rem, -0.5rem);
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      max-width: 18.75rem;
+      height: 100vh;
+      background: #fff;
+      box-shadow: 0.125rem 0 1rem rgba(0,0,0,0.1);
+      transition: left 0.3s ease;
+      z-index: 30;
+      padding: 1.5rem;
+    }
+    .sidebar.open { left: 0; }
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .sidebar-header img { height: 2rem; }
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #64748b;
+      cursor: pointer;
+      padding: 0;
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sidebar-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 0.5rem;
+    }
+    .sidebar-links a {
+      font-size: 1rem;
+      font-weight: 500;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      transition: background 0.2s;
+    }
+    .sidebar-links a:hover, .sidebar-links a.active {
+      background: #f1f5f9;
+      color: #2563eb;
+      font-weight: 700;
+    }
+    .sidebar-profile {
+      margin: 0 0 1.5rem 0;
+      padding: 0 0 1.5rem 0;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .sidebar-profile img {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      border: 2px solid #e2e8f0;
+    }
+    .sidebar-profile-info { flex: 1; }
+    .sidebar-profile-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: #0f172a;
+    }
+    .sidebar-profile-email {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+    
+    /* OVERLAY */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      z-index: 25;
+    }
+    .overlay.show { display: block; }
 
     /* MAIN */
     .main-content {
@@ -92,9 +212,7 @@
     }
 
     /* FORM */
-    .form-group {
-      margin-bottom: 2rem;
-    }
+    .form-group { margin-bottom: 2rem; }
     .form-label {
       display: block;
       color: #0f172a;
@@ -104,18 +222,22 @@
     }
     .form-select {
       width: 100%;
-      padding: 0.875rem 1rem;
+      padding: 0.875rem 1rem 0.875rem 1rem;
       border: 2px solid #bcbcbd;
       border-radius: 0.625rem;
       font-size: 0.9375rem;
       color: #6f7379;
       font-style: italic;
-      background: #e7e7e7 url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%2364748b%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e') no-repeat right 1rem center;
+      background: #ffffff url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%2364748b%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e') no-repeat right 1rem center;
       background-size: 1.25rem;
-      padding-right: 2.8125rem;
+      padding-right: 2.5rem;
       cursor: pointer;
       appearance: none;
       transition: border-color 0.2s;
+    }
+    .form-select option {
+      font-size: 0.8125rem;
+      padding: 0.375rem 0.5rem;
     }
     .form-select:focus {
       outline: none;
@@ -158,9 +280,7 @@
       justify-content: center;
       margin-bottom: 0.75rem;
     }
-    .file-card.show {
-      display: flex;
-    }
+    .file-card.show { display: flex; }
     .file-display {
       background: #fff;
       border: 2px solid #e2e8f0;
@@ -170,7 +290,7 @@
       align-items: center;
       gap: 0.875rem;
       max-width: 25rem;
-      width: 100%;
+      width: 70%;
       box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,0.06);
     }
     .pdf-icon {
@@ -215,9 +335,7 @@
       flex-shrink: 0;
       transition: background 0.2s;
     }
-    .remove-btn:hover {
-      background: #334155;
-    }
+    .remove-btn:hover { background: #334155; }
     .remove-btn svg {
       width: 0.875rem;
       height: 0.875rem;
@@ -235,53 +353,33 @@
       padding: 1.5625rem;
       text-align: center;
       color: #64748b;
-      border-top: 1px solid #e2e8f0;
+      border-top: 1px solid #c5c9ce;
       font-size: 0.875rem;
     }
 
     /* RESPONSIVE */
     @media (max-width: 768px) {
-      html {
-        font-size: 15px;
-      }
+      html { font-size: 15px; }
       .navbar { 
-        height: 3.5rem;
+        height: 4rem;
         padding: 0 1rem; 
       }
-      .nav-links {
-        gap: 1rem;
-      }
-      .page-header {
-        margin-bottom: 2.5rem;
-      }
-      .page-title { 
-        font-size: 2rem; 
-      }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .page-header { margin-bottom: 2.5rem; }
+      .page-title { font-size: 2rem; }
     }
 
     @media (max-width: 480px) {
-      html {
-        font-size: 14px;
-      }
+      html { font-size: 14px; }
       .navbar {
-        height: 3.25rem;
+        height: 4rem;
         padding: 0 0.75rem;
       }
-      .nav-links {
-        gap: 0.75rem;
-      }
-      .main-content {
-        padding: 2.5rem 5%;
-      }
-      .page-header {
-        margin-bottom: 2rem;
-      }
-      .page-title {
-        font-size: 1.75rem;
-      }
-      .form-group {
-        margin-bottom: 1.5rem;
-      }
+      .main-content { padding: 2.5rem 5%; }
+      .page-header { margin-bottom: 2rem; }
+      .page-title { font-size: 1.75rem; }
+      .form-group { margin-bottom: 1.5rem; }
       .upload-btn, .analyze-btn {
         padding: 0.75rem 2.5rem;
         font-size: 1.125rem;
@@ -294,10 +392,38 @@
   </style>
 </head>
 <body>
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <img src="https://via.placeholder.com/120x40/2563eb/ffffff?text=MatchMyCV" alt="MatchMyCV">
+      <button class="close-btn" onclick="closeSidebar()">×</button>
+    </div>
+    <div class="sidebar-profile">
+      <img src="https://i.pravatar.cc/150?img=12" alt="profile">
+      <div class="sidebar-profile-info">
+        <div class="sidebar-profile-name">John Doe</div>
+        <div class="sidebar-profile-email">john@example.com</div>
+      </div>
+    </div>
+    <div class="sidebar-links">
+      <a href="#" onclick="setActive(event)">Home</a>
+      <a href="#" class="active" onclick="setActive(event)">Analyze CV</a>
+      <a href="#" onclick="setActive(event)">About Us</a>
+      <a href="#" onclick="setActive(event)">FAQ</a>
+    </div>
+  </div>
 
   <div class="navbar">
-    <div class="brand">
-      <img src="https://via.placeholder.com/120x40/2563eb/ffffff?text=MatchMyCV" alt="MatchMyCV">
+    <div class="navbar-left">
+      <div class="hamburger" id="hamburger" onclick="toggleSidebar()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="brand">
+        <img src="https://via.placeholder.com/120x40/2563eb/ffffff?text=MatchMyCV" alt="MatchMyCV">
+      </div>
     </div>
     <div class="nav-links">
       <a href="#">Home</a>
@@ -310,7 +436,6 @@
 
   <main class="main-content">
     <div class="container">
-      
       <div class="page-header">
         <h1 class="page-title">Match Your CV</h1>
         <p class="page-subtitle">Find the best job matches for your CV instantly.</p>
@@ -318,8 +443,8 @@
 
       <div class="form-group">
         <label class="form-label" for="location">Location</label>
-        <select id="location" class="form-select">
-          <option value="">Choose your preferred location...</option>
+        <select id="location" class="form-select selected">
+          <option value="all">All Locations</option>
           <option value="jakarta">Jakarta</option>
           <option value="surabaya">Surabaya</option>
           <option value="bandung">Bandung</option>
@@ -367,20 +492,58 @@
     </div>
   </main>
 
-  <footer>
-    © MatchMyCV 2025. All Rights Reserved.
-  </footer>
+  <footer>© MatchMyCV 2025. All Rights Reserved.</footer>
 
   <script>
-    const fileInput = document.getElementById('cv-upload');
-    const uploadBtn = document.getElementById('upload-btn');
-    const fileCard = document.getElementById('file-card');
-    const analyzeBtn = document.getElementById('analyze-btn');
-    const locationSelect = document.getElementById('location');
+    const els = {
+      sidebar: document.getElementById('sidebar'),
+      overlay: document.getElementById('overlay'),
+      hamburger: document.getElementById('hamburger'),
+      fileInput: document.getElementById('cv-upload'),
+      uploadBtn: document.getElementById('upload-btn'),
+      fileCard: document.getElementById('file-card'),
+      analyzeBtn: document.getElementById('analyze-btn'),
+      locationSelect: document.getElementById('location')
+    };
     
     let uploadedFile = null;
 
-    fileInput.addEventListener('change', function(e) {
+    function toggleSidebar() {
+      els.sidebar.classList.toggle('open');
+      els.overlay.classList.toggle('show');
+      els.hamburger.classList.toggle('active');
+    }
+
+    function closeSidebar() {
+      els.sidebar.classList.remove('open');
+      els.overlay.classList.remove('show');
+      els.hamburger.classList.remove('active');
+    }
+
+    function setActive(e) {
+      e.preventDefault();
+      document.querySelectorAll('.sidebar-links a, .nav-links a').forEach(link => link.classList.remove('active'));
+      e.target.classList.add('active');
+      const text = e.target.textContent;
+      document.querySelectorAll('.nav-links a').forEach(link => {
+        if (link.textContent === text) link.classList.add('active');
+      });
+      closeSidebar();
+    }
+
+    function removeFile() {
+      uploadedFile = null;
+      els.fileInput.value = '';
+      els.uploadBtn.style.display = 'block';
+      els.fileCard.classList.remove('show');
+      els.analyzeBtn.style.display = 'none';
+    }
+
+    function checkFormValidity() {
+      els.analyzeBtn.style.display = uploadedFile ? 'block' : 'none';
+    }
+
+    els.fileInput.addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
       
@@ -395,46 +558,22 @@
       }
       
       uploadedFile = file;
-      uploadBtn.style.display = 'none';
-      fileCard.classList.add('show');
-      
+      els.uploadBtn.style.display = 'none';
+      els.fileCard.classList.add('show');
       document.getElementById('display-filename').textContent = file.name;
       document.getElementById('display-filesize').textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB`;
-      
       checkFormValidity();
     });
 
-    function removeFile() {
-      uploadedFile = null;
-      fileInput.value = '';
-      uploadBtn.style.display = 'block';
-      fileCard.classList.remove('show');
-      analyzeBtn.style.display = 'none';
-      checkFormValidity();
-    }
-
-    function checkFormValidity() {
-      if (uploadedFile && locationSelect.value) {
-        analyzeBtn.style.display = 'block';
-      } else {
-        analyzeBtn.style.display = 'none';
-      }
-    }
-
-    locationSelect.addEventListener('change', function() {
-      if (this.value) {
-        this.classList.add('selected');
-      } else {
-        this.classList.remove('selected');
-      }
+    els.locationSelect.addEventListener('change', function() {
+      this.classList.toggle('selected', !!this.value);
       checkFormValidity();
     });
 
-    analyzeBtn.addEventListener('click', function() {
-      console.log('Analyzing CV:', uploadedFile.name, 'Location:', locationSelect.value);
+    els.analyzeBtn.addEventListener('click', function() {
+      console.log('Analyzing CV:', uploadedFile.name, 'Location:', els.locationSelect.value);
       alert('Analyzing your CV...');
     });
   </script>
-
 </body>
 </html>
