@@ -6,24 +6,100 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}MatchMyCV{% endblock %}</title>
 
-  <!-- Tailwind CDN (dev) -->
+  <script>
+    window.tailwind = {
+      config: {
+        theme: { extend: { fontFamily: { inter: ['Inter','ui-sans-serif','system-ui'] } } }
+      }
+    }
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/main.css' %}">
 
+  <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
   {% block extra_head %}{% endblock %}
 </head>
-<body>
-  <!-- Header -->
-  {% include 'header.html' %}
 
-  <!-- Isi Konten -->
-  {% block content %}{% endblock %}
+<body class="min-h-screen flex flex-col font-inter bg-[#e1edf7] text-slate-900">
+  {# Header hanya selain /login & /register #}
+  {% if request.path != '/login/' and request.path != '/register/' %}
+    {% if user.is_authenticated %}
+      {% include 'navigation/auth_header.html' %}
+    {% else %}
+      {% include 'navigation/guest_header.html' %}
+    {% endif %}
+  {% endif %}
+
+  <main class="flex-1">
+    <!-- Global Flash Messages (BDD-friendly) -->
+    <div id="flash-messages" role="region" aria-live="polite" aria-atomic="true" class="mb-4 space-y-2" data-testid="flash-messages">
+      {% if messages %}
+        {% for message in messages %}
+          <div
+            class="rounded-md px-4 py-3 text-sm
+              {% if 'success' in message.tags %}bg-emerald-50 text-emerald-800 border border-emerald-200{% endif %}
+              {% if 'error' in message.tags %}bg-rose-50 text-rose-700 border border-rose-200{% endif %}
+              {% if 'warning' in message.tags %}bg-amber-50 text-amber-800 border border-amber-200{% endif %}
+              {% if 'info' in message.tags or 'debug' in message.tags %}bg-sky-50 text-sky-800 border border-sky-200{% endif %}"
+            data-testid="flash-message-item">
+            <span class="flash-message-text">{{ message|striptags }}</span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="hidden" aria-hidden="true" data-testid="flash-message-empty"></div>
+      {% endif %}
+    </div>
+
+    {% block content %}{% endblock %}
+  </main>
+
+  {# Footer juga disembunyikan di /login & /register (opsional) #}
+  {% if request.path != '/login/' and request.path != '/register/' %}
+    {% include 'navigation/footer.html' %}
+  {% endif %}
+
   {% block extra_js %}{% endblock %}
 
-  <!-- Footer -->
-  {% include 'footer.html' %}
+  <script>
+    if (typeof window.HeaderInit === 'function') {
+      try { window.HeaderInit(); } catch(e){ console.error(e); }
+    }
+  </script>
+
+  {# ----- Toast Messages (global), render di akhir body ----- #}
+  {% if messages %}
+    <script id="dj-messages" type="application/json">
+      [
+        {% for m in messages %}
+          { "level": "{{ m.tags|escapejs }}", "text": "{{ m|striptags|escapejs }}" }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ]
+    </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const el = document.getElementById('dj-messages');
+        if (!el) return;
+        let msgs = [];
+        try { msgs = JSON.parse(el.textContent || '[]'); } catch (e) { console.error(e); }
+        msgs.forEach(m => {
+          const icon = (m.level === 'error') ? 'error' : (m.level || 'info');
+            Swal.fire({
+              icon,
+              title: m.text,
+              confirmButtonText: 'OK',
+              timer: 3000,
+              timerProgressBar: false,
+              showConfirmButton: true,  
+              position: 'center',     
+            });
+        });
+      });
+    </script>
+  {% endif %}
 </body>
 </html>

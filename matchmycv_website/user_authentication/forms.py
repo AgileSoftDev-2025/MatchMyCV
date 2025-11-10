@@ -1,8 +1,10 @@
 from django import forms
-from django.contrib.auth import authenticate
-from django.core.exceptions import MultipleObjectsReturned
+from django.contrib.auth import authenticate, get_user_model
+from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+
+UserModel = get_user_model()
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField()
@@ -11,7 +13,16 @@ class RegisterForm(UserCreationForm):
         model = User
         fields = ['username', 'email', 'password1', 'password2']
 
-
+    def clean_email(self):
+        email = (self.cleaned_data.get('email') or '').strip()
+        if UserModel.objects.filter(email=email).exists():
+            # kode error supaya bisa dipetakan jika ingin (opsional)
+            raise ValidationError(
+                "Email sudah terdaftar. Silakan gunakan email lain.",
+                code="email_exists"
+            )
+        return email
+    
 class EmailLoginForm(forms.Form):
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)
@@ -26,16 +37,10 @@ class EmailLoginForm(forms.Form):
 
         try:
             user_obj = User.objects.get(email=email)
-        except User.DoesNotExist:
-            raise forms.ValidationError("Email tidak terdaftar.")
-        except MultipleObjectsReturned:
-            raise forms.ValidationError("Email terdaftar pada lebih dari satu akun. Gunakan username.")
+        except (User.DoesNotExist, MultipleObjectsReturned):
+            return cleaned
 
         user = authenticate(username=user_obj.username, password=password)
-        if user is None:
-            raise forms.ValidationError("Email atau password salah.")
-        if not user.is_active:
-            raise forms.ValidationError("Akun dinonaktifkan.")
-
-        cleaned['user'] = user
+        if user:
+            cleaned['user'] = user
         return cleaned
