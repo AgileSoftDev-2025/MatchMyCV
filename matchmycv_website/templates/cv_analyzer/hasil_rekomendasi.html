@@ -1,7 +1,198 @@
-{% extends "base.html" %}
-{% block title %}Beranda | MatchMyCV{% endblock %}
-{% block content %}
-  <div class="p-5 bg-light rounded-3">
-    <h1 class="fw-bold">Hasil Rekomendasi</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MatchMyCV - CV Analysis Results</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Styling untuk pseudo-element yang kompleks (dekorasi) 
+      disimpan di sini karena tidak praktis dikonversi ke utility class.
+    */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 40px;
+      left: 120px;
+      width: 50px;
+      height: 50px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23cbd5e1" stroke-width="1.5"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>') no-repeat center;
+      opacity: 0.3;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 60px;
+      left: 80px;
+      width: 45px;
+      height: 45px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23cbd5e1" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>') no-repeat center;
+      opacity: 0.25;
+    }
+  </style>
+</head>
+<body class="bg-white font-sans leading-normal text-slate-900">
+  <div class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-100 bg-white px-[18px] md:px-8">
+    <div class="flex items-center gap-2.5">
+      <img src="{% static 'images/Logo MatchMyCV.png' %}" alt="MatchMyCV Logo" class="block h-9 w-auto">
+    </div>
+    <div class="flex items-center gap-7">
+      <a href="#" class="text-[15px] font-semibold text-slate-500">Home</a>
+      <a href="#" class="text-[15px] font-semibold text-blue-600">Analyze CV</a>
+      <a href="#" class="text-[15px] font-semibold text-slate-500">About Us</a>
+      <a href="#" class="text-[15px] font-semibold text-slate-500">FAQ</a>
+      <img src="https://i.pravatar.cc/150?img=12" alt="profile" class="h-9 w-9 rounded-full border-2 border-slate-200 object-cover">
+    </div>
   </div>
-{% endblock %}
+  
+  <section class="hero relative overflow-hidden bg-gradient-to-b from-[#dfe9f5] to-[#e6f2fb] px-[18px] py-7 md:pt-12 md:px-20 md:pb-15">
+    <div class="mb-10 text-center">
+      <div class="mb-2.5 text-[32px] font-bold text-[#3b5998] md:text-[42px]">CV Analysis Results</div>
+      <div class="mb-0 text-lg text-slate-800">We found some jobs that matched your CV best.</div>
+    </div>
+    <div class="relative mx-auto flex max-w-[1200px] flex-col items-center gap-[50px] lg:flex-row">
+      <div class="relative mb-[30px] flex flex-1 items-center justify-center lg:mb-0">
+        <img src="{% static 'images/Gambar Hasil Analyze.png' %}" alt="Resume Illustration" class="block h-auto w-[420px] max-w-full">
+      </div>
+      <div class="w-full flex-1 min-w-[320px] max-w-[560px]">
+        <div class="mb-6 text-center text-[26px] font-bold text-slate-900">Your CV Summary</div>
+        <div class="flex flex-col gap-4">
+          <div class="rounded-2xl border border-slate-900/[.08] bg-white py-[22px] px-[26px] shadow-[0_4px_14px_rgba(2,6,23,0.08)]">
+            <h4 class="mb-3 text-[17px] font-bold text-slate-900">Skills</h4>
+            <ul class="ml-5 text-[15px] leading-[1.7] text-slate-700">
+              <li class="mb-1.5">Python</li>
+              <li class="mb-1.5">Java</li>
+              <li class="mb-1.5">SQL</li>
+              <li class="mb-1.5">Machine Learning</li>
+            </ul>
+          </div>
+          <div class="rounded-2xl border border-slate-900/[.08] bg-white py-[22px] px-[26px] shadow-[0_4px_14px_rgba(2,6,23,0.08)]">
+            <h4 class="mb-3 text-[17px] font-bold text-slate-900">Experience</h4>
+            <p class="text-[15px] leading-[1.6] text-slate-700">Software Engineer XYZ Tech</p>
+          </div>
+          <div class="rounded-2xl border border-slate-900/[.08] bg-white py-[22px] px-[26px] shadow-[0_4px_14px_rgba(2,6,23,0.08)]">
+            <h4 class="mb-3 text-[17px] font-bold text-slate-900">Education</h4>
+            <p class="text-[15px] leading-[1.6] text-slate-700">S1 Sistem Informasi</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <section class="bg-white py-10 px-[18px] md:py-14 md:px-20">
+    <div class="mx-auto max-w-[1200px]">
+      <h2 class="mb-10 text-center text-[28px] font-bold text-slate-900">Jobs That Matched Your CV</h2>
+      <div class="grid grid-cols-1 gap-[30px] md:grid-cols-2 lg:grid-cols-3">
+        
+        <div class="flex flex-col overflow-hidden rounded-xl border border-slate-900/[.06] bg-white shadow-[0_4px_12px_rgba(2,6,23,0.08)] transition-shadow transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)]">
+          <div class="relative h-[180px] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop" alt="office" class="block h-full w-full object-cover">
+            <div class="absolute top-3 right-3 rounded-full bg-green-500 py-1.5 px-3.5 text-xs font-semibold text-white shadow-[0_2px_8px_rgba(34,197,94,0.3)]">Match: 80%</div>
+          </div>
+          <div class="flex flex-1 flex-col p-5">
+            <div class="mb-1.5 text-lg font-semibold text-slate-900">Software Engineer</div>
+            <div class="mb-3 text-sm text-slate-500">PT Quartz Clock</div>
+            <div class="mb-4 flex flex-col gap-1.5 text-sm text-slate-600">
+              <div class="flex items-center gap-1.5">📍 Mulyorejo, Surabaya</div>
+              <div class="flex items-center gap-1.5">💼 Full-time</div>
+              <div class="flex items-center gap-1.5 font-semibold text-green-600">💰 Rp8.000.000 - Rp10.000.000</div>
+            </div>
+            <a class="mt-auto block rounded-lg bg-blue-600 p-3 text-center text-sm font-semibold text-white transition-colors duration-200 hover:bg-blue-700" href="#">SEE MORE</a>
+          </div>
+        </div>
+        
+        <div class="flex flex-col overflow-hidden rounded-xl border border-slate-900/[.06] bg-white shadow-[0_4px_12px_rgba(2,6,23,0.08)] transition-shadow transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)]">
+          <div class="relative h-[180px] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1496568816309-51d7c20e3b21?w=400&h=300&fit=crop" alt="office" class="block h-full w-full object-cover">
+            <div class="absolute top-3 right-3 rounded-full bg-green-500 py-1.5 px-3.5 text-xs font-semibold text-white shadow-[0_2px_8px_rgba(34,197,94,0.3)]">Match: 80%</div>
+          </div>
+          <div class="flex flex-1 flex-col p-5">
+            <div class="mb-1.5 text-lg font-semibold text-slate-900">Software Engineer</div>
+            <div class="mb-3 text-sm text-slate-500">PT Quartz Clock</div>
+            <div class="mb-4 flex flex-col gap-1.5 text-sm text-slate-600">
+              <div class="flex items-center gap-1.5">📍 Mulyorejo, Surabaya</div>
+              <div class="flex items-center gap-1.5">💼 Full-time</div>
+              <div class="flex items-center gap-1.5 font-semibold text-green-600">💰 Rp8.000.000</div>
+            </div>
+            <a class="mt-auto block rounded-lg bg-blue-600 p-3 text-center text-sm font-semibold text-white transition-colors duration-200 hover:bg-blue-700" href="#">SEE MORE</a>
+          </div>
+        </div>
+        
+        <div class="flex flex-col overflow-hidden rounded-xl border border-slate-900/[.06] bg-white shadow-[0_4px_12px_rgba(2,6,23,0.08)] transition-shadow transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)]">
+          <div class="relative h-[180px] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&h=300&fit=crop" alt="office" class="block h-full w-full object-cover">
+            <div class="absolute top-3 right-3 rounded-full bg-green-500 py-1.5 px-3.5 text-xs font-semibold text-white shadow-[0_2px_8px_rgba(34,197,94,0.3)]">Match: 80%</div>
+          </div>
+          <div class="flex flex-1 flex-col p-5">
+            <div class="mb-1.5 text-lg font-semibold text-slate-900">Software Engineer</div>
+            <div class="mb-3 text-sm text-slate-500">PT Quartz Clock</div>
+            <div class="mb-4 flex flex-col gap-1.5 text-sm text-slate-600">
+              <div class="flex items-center gap-1.5">📍 Mulyorejo, Surabaya</div>
+              <div class="flex items-center gap-1.5">💼 Full-time</div>
+              <div class="flex items-center gap-1.5 font-semibold text-green-600">💰 Rp8.000.000</div>
+            </div>
+            <a class="mt-auto block rounded-lg bg-blue-600 p-3 text-center text-sm font-semibold text-white transition-colors duration-200 hover:bg-blue-700" href="#">SEE MORE</a>
+          </div>
+        </div>
+        
+        <div class="flex flex-col overflow-hidden rounded-xl border border-slate-900/[.06] bg-white shadow-[0_4px_12px_rgba(2,6,23,0.08)] transition-shadow transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)]">
+          <div class="relative h-[180px] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1577495508048-b635879837f1?w=400&h=300&fit=crop" alt="office" class="block h-full w-full object-cover">
+            <div class="absolute top-3 right-3 rounded-full bg-green-500 py-1.5 px-3.5 text-xs font-semibold text-white shadow-[0_2px_8px_rgba(34,197,94,0.3)]">Match: 80%</div>
+          </div>
+          <div class="flex flex-1 flex-col p-5">
+            <div class="mb-1.5 text-lg font-semibold text-slate-900">Software Engineer</div>
+            <div class="mb-3 text-sm text-slate-500">PT Quartz Clock</div>
+            <div class="mb-4 flex flex-col gap-1.5 text-sm text-slate-600">
+              <div class="flex items-center gap-1.5">📍 Mulyorejo, Surabaya</div>
+              <div class="flex items-center gap-1.5">💼 Full-time</div>
+              <div class="flex items-center gap-1.5 font-semibold text-green-600">💰 Rp8.000.000 - Rp10.000.000</div>
+            </div>
+            <a class="mt-auto block rounded-lg bg-blue-600 p-3 text-center text-sm font-semibold text-white transition-colors duration-200 hover:bg-blue-700" href="#">SEE MORE</a>
+          </div>
+        </div>
+        
+        <div class="flex flex-col overflow-hidden rounded-xl border border-slate-900/[.06] bg-white shadow-[0_4px_12px_rgba(2,6,23,0.08)] transition-shadow transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)]">
+          <div class="relative h-[180px] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&h=300&fit=crop" alt="office" class="block h-full w-full object-cover">
+            <div class="absolute top-3 right-3 rounded-full bg-green-500 py-1.5 px-3.5 text-xs font-semibold text-white shadow-[0_2px_8px_rgba(34,197,94,0.3)]">Match: 80%</div>
+          </div>
+          <div class="flex flex-1 flex-col p-5">
+            <div class="mb-1.5 text-lg font-semibold text-slate-900">Software Engineer</div>
+            <div class="mb-3 text-sm text-slate-500">PT Quartz Clock</div>
+            <div class="mb-4 flex flex-col gap-1.5 text-sm text-slate-600">
+              <div class="flex items-center gap-1.5">📍 Mulyorejo, Surabaya</div>
+              <div class="flex items-center gap-1.5">💼 Full-time</div>
+              <div class="flex items-center gap-1.5 font-semibold text-green-600">💰 Rp8.000.000</div>
+            </div>
+            <a class="mt-auto block rounded-lg bg-blue-600 p-3 text-center text-sm font-semibold text-white transition-colors duration-200 hover:bg-blue-700" href="#">SEE MORE</a>
+          </div>
+        </div>
+        
+        <div class="flex flex-col overflow-hidden rounded-xl border border-slate-900/[.06] bg-white shadow-[0_4px_12px_rgba(2,6,23,0.08)] transition-shadow transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)]">
+          <div class="relative h-[180px] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1524813686514-a57563d77965?w=400&h=300&fit=crop" alt="office" class="block h-full w-full object-cover">
+            <div class="absolute top-3 right-3 rounded-full bg-green-500 py-1.5 px-3.5 text-xs font-semibold text-white shadow-[0_2px_8px_rgba(34,197,94,0.3)]">Match: 80%</div>
+          </div>
+          <div class="flex flex-1 flex-col p-5">
+            <div class="mb-1.5 text-lg font-semibold text-slate-900">Software Engineer</div>
+            <div class="mb-3 text-sm text-slate-500">PT Quartz Clock</div>
+            <div class="mb-4 flex flex-col gap-1.5 text-sm text-slate-600">
+              <div class="flex items-center gap-1.5">📍 Mulyorejo, Surabaya</div>
+              <div class="flex items-center gap-1.5">💼 Full-time</div>
+              <div class="flex items-center gap-1.5 font-semibold text-green-600">💰 Rp8.000.000 - Rp10.000.000</div>
+            </div>
+            <a class="mt-auto block rounded-lg bg-blue-600 p-3 text-center text-sm font-semibold text-white transition-colors duration-200 hover:bg-blue-700" href="#">SEE MORE</a>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </section>
+  
+  <footer class="border-t border-slate-100 p-6 text-center text-sm text-slate-500">
+    © MatchMyCV 2025. All Rights Reserved.
+  </footer>
+</body>
+</html>
