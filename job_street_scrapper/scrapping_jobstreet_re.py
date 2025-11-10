@@ -670,5 +670,4 @@ def scrapeData(
 
 
 if __name__ == "__main__":
-    # Tanpa batas jumlah, tanpa batas halaman/keyword
     scrapeData("public.scrape_items", max_jobs=None, max_pages_per_kw=None)
