@@ -1,7 +1,411 @@
-{% extends "base.html" %}
-{% block title %}Beranda | MatchMyCV{% endblock %}
-{% block content %}
-  <div class="p-5 bg-light rounded-3">
-    <h1 class="fw-bold">Hasil Rekomendasi</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MatchMyCV - CV Analysis Results</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --blue-600: #2563eb;
+      --blue-50: #e9f4fb;
+      --muted: #64748b;
+      --card-shadow: 0 6px 18px rgba(2,6,23,0.06);
+    }
+    *{box-sizing:border-box;font-family:'Inter',sans-serif;margin:0;padding:0}
+    body{background:#fff;color:#0f172a;line-height:1.4;-webkit-font-smoothing:antialiased}
+
+    /* NAVBAR */
+    .navbar{
+      height:64px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 32px;
+      border-bottom:1px solid rgba(2,6,23,0.04);
+      background:#fff;
+      position:sticky;
+      top:0;
+      z-index:20;
+      gap:12px;
+    }
+    .brand{
+      display:flex;align-items:center;gap:10px;
+    }
+    .brand img{height:36px;width:auto;display:block}
+    .brand .title{color:var(--blue-600);font-weight:700;font-size:18px}
+    .nav-links{display:flex;gap:20px;align-items:center;flex-shrink:0}
+    .nav-links a{color:var(--muted);text-decoration:none;font-weight:600;font-size:15px;white-space:nowrap}
+    .nav-links a.active{color:var(--blue-600)}
+    .profile-pic{width:36px;height:36px;border-radius:999px;object-fit:cover;border:2px solid #e2e8f0}
+
+    /* small-screen: allow horizontal scroll for nav-links instead of wrapping */
+    .nav-scroll {
+      display:flex;
+      gap:20px;
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+      padding-bottom:2px;
+    }
+    .nav-scroll::-webkit-scrollbar{height:6px}
+    .nav-scroll::-webkit-scrollbar-thumb{background:rgba(2,6,23,0.06);border-radius:6px}
+
+    /* HERO */
+    .hero{
+      background: linear-gradient(180deg, #dfe9f5 0%, #e6f2fb 100%);
+      padding:48px 80px 60px;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero::before{
+      content:'';
+      position:absolute;
+      top:40px;
+      left:120px;
+      width:50px;
+      height:50px;
+      background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23cbd5e1" stroke-width="1.5"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>') no-repeat center;
+      opacity:0.3;
+    }
+    .hero::after{
+      content:'';
+      position:absolute;
+      bottom:60px;
+      left:80px;
+      width:45px;
+      height:45px;
+      background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23cbd5e1" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>') no-repeat center;
+      opacity:0.25;
+    }
+
+    .hero-header{text-align:center;margin-bottom:40px}
+    .hero-title{color:#3b5998;font-weight:700;font-size:42px;margin-bottom:10px}
+    .hero-sub{color:#1e293b;margin-bottom:0;font-size:18px}
+
+    .hero-content{
+      max-width:1200px;
+      margin:0 auto;
+      display:flex;
+      gap:50px;
+      align-items:center;
+      position:relative;
+      align-items:flex-start;
+    }
+
+    /* left: illustration */
+    .hero-left{flex:1;display:flex;justify-content:center;align-items:center;position:relative}
+    .hero-left img{max-width:100%;width:100%;height:auto;display:block;max-width:420px}
+
+    /* right: CV summary */
+    .hero-right{flex:1;min-width:280px;max-width:560px}
+    .summary-heading{font-size:26px;font-weight:700;margin:0 0 24px;color:#0f172a;text-align:center}
+    .summary-list{display:flex;flex-direction:column;gap:16px}
+
+    /* cards */
+    .cv-card{
+      background:#fff;
+      border-radius:16px;
+      padding:22px 26px;
+      border:1px solid rgba(2,6,23,0.08);
+      box-shadow: 0 4px 14px rgba(2,6,23,0.08);
+    }
+    .cv-card h4{font-size:17px;margin-bottom:12px;font-weight:700;color:#0f172a}
+    .cv-card ul{margin-left:20px;color:#334155;font-size:15px;line-height:1.7}
+    .cv-card ul li{margin-bottom:6px}
+    .cv-card p{color:#334155;font-size:15px;line-height:1.6}
+
+    /* JOBS */
+    .jobs{padding:56px 80px;background:#fff}
+    .jobs-inner{max-width:1200px;margin:0 auto}
+    .jobs h2{text-align:center;font-size:28px;font-weight:700;margin-bottom:40px;color:#0f172a}
+
+    /* use auto-fit for responsive card columns */
+    .jobs-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap:30px;
+      align-items:start;
+    }
+
+    .job-card{
+      background:#fff;
+      border-radius:12px;
+      border:1px solid rgba(2,6,23,0.06);
+      box-shadow:0 4px 12px rgba(2,6,23,0.08);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      transition:transform 0.2s,box-shadow 0.2s
+    }
+    .job-card:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(2,6,23,0.12)}
+
+    .job-card .media{position:relative;height:180px;overflow:hidden}
+    .job-card .media img{width:100%;height:100%;object-fit:cover;display:block}
+    .badge{
+      position:absolute;
+      top:12px;
+      right:12px;
+      background:#22c55e;
+      color:#fff;
+      padding:6px 14px;
+      border-radius:999px;
+      font-weight:600;
+      font-size:12px;
+      box-shadow:0 2px 8px rgba(34,197,94,0.3)
+    }
+
+    .job-body{padding:20px;flex:1;display:flex;flex-direction:column}
+    .job-title{font-size:18px;font-weight:600;margin-bottom:6px;color:#0f172a}
+    .job-company{color:var(--muted);font-size:14px;margin-bottom:12px}
+    .job-meta{display:flex;flex-direction:column;gap:6px;color:#475569;font-size:14px;margin-bottom:16px}
+    .job-meta-item{display:flex;align-items:center;gap:6px}
+    .salary{color:#16a34a;font-weight:600}
+    .see-more{
+      margin-top:auto;
+      background:var(--blue-600);
+      color:#fff;
+      padding:12px;
+      border-radius:8px;
+      text-align:center;
+      text-decoration:none;
+      font-weight:600;
+      font-size:14px;
+      display:block;
+      transition:background 0.2s
+    }
+    .see-more:hover{background:#1d4ed8}
+
+    /* footer */
+    footer{padding:25px;text-align:center;color:var(--muted);border-top:1px solid rgba(2,6,23,0.04);font-size:14px}
+
+    /* responsiveness */
+    @media (max-width: 980px){
+      .hero-content{flex-direction:column;align-items:center}
+      .hero-left{margin-bottom:30px}
+      .jobs-grid{grid-template-columns:repeat(2,1fr)}
+      .hero{padding:40px 36px 48px}
+      .navbar{padding:0 18px}
+    }
+    @media (max-width: 760px){
+      /* switch nav-links into scrollable area to preserve look */
+      .nav-links { display:none; }
+      .nav-scroll { display:flex; align-items:center; gap:12px; }
+      .navbar{height:auto;padding:12px 16px;align-items:flex-start;gap:8px}
+      .brand .title{font-size:16px}
+      .hero{padding:28px 18px 36px}
+      .hero-title{font-size:36px}
+      .hero-sub{font-size:15px}
+      .hero-header{margin-bottom:28px}
+      .hero-left img{max-width:360px}
+      .hero-right{width:100%;max-width:640px}
+      .cv-card{padding:18px}
+      .jobs{padding:40px 18px}
+    }
+    @media (max-width: 640px){
+      .jobs-grid{grid-template-columns:1fr}
+      .hero{padding:22px 14px}
+      .navbar{padding:8px 12px}
+      .hero-title{font-size:32px}
+      .summary-heading{font-size:20px}
+      .cv-card{padding:14px 16px;border-radius:12px}
+      .job-card .media{height:160px}
+      .job-body{padding:16px}
+      .see-more{padding:10px;font-size:13px}
+      .profile-pic{width:32px;height:32px}
+    }
+    @media (max-width:420px){
+      .hero-title{font-size:28px}
+      .hero-sub{font-size:14px}
+      .hero-left img{max-width:280px}
+      .jobs{padding:28px 12px}
+      .cv-card h4{font-size:15px}
+      .job-card .media{height:140px}
+      .job-title{font-size:16px}
+      .badge{padding:5px 10px;font-size:11px}
+      .brand img{height:32px}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <div class="brand">
+      <img src="{% static 'images/Logo MatchMyCV.png' %}" alt="MatchMyCV Logo">
+    </div>
+
+    <!-- For small screens we show a horizontally scrollable nav bar to keep the same visual items -->
+    <div class="nav-scroll" aria-hidden="false" role="navigation">
+      <a href="#" class="nav-link">Home</a>
+      <a href="#" class="nav-link active">Analyze CV</a>
+      <a href="#" class="nav-link">About Us</a>
+      <a href="#" class="nav-link">FAQ</a>
+      <img src="https://i.pravatar.cc/150?img=12" alt="profile" class="profile-pic" style="margin-left:10px">
+    </div>
+
+    <!-- Original nav-links for wider screens -->
+    <div class="nav-links" role="navigation" aria-label="Main Navigation">
+      <a href="#">Home</a>
+      <a href="#" class="active">Analyze CV</a>
+      <a href="#">About Us</a>
+      <a href="#">FAQ</a>
+      <img src="https://i.pravatar.cc/150?img=12" alt="profile" class="profile-pic">
+    </div>
   </div>
-{% endblock %}
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-header">
+      <div class="hero-title">CV Analysis Results</div>
+      <div class="hero-sub">We found some jobs that matched your CV best.</div>
+    </div>
+
+    <div class="hero-content">
+      <div class="hero-left">
+        <img src="{% static 'images/Gambar Hasil Analyze.png' %}" alt="Resume Illustration">
+      </div>
+
+      <div class="hero-right">
+        <div class="summary-heading">Your CV Summary</div>
+
+        <div class="summary-list">
+          <div class="cv-card">
+            <h4>Skills</h4>
+            <ul>
+              <li>Python</li>
+              <li>Java</li>
+              <li>SQL</li>
+              <li>Machine Learning</li>
+            </ul>
+          </div>
+
+          <div class="cv-card">
+            <h4>Experience</h4>
+            <p>Software Engineer XYZ Tech</p>
+          </div>
+
+          <div class="cv-card">
+            <h4>Education</h4>
+            <p>S1 Sistem Informasi</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JOBS -->
+  <section class="jobs">
+    <div class="jobs-inner">
+      <h2>Jobs That Matched Your CV</h2>
+
+      <div class="jobs-grid">
+        <div class="job-card">
+          <div class="media">
+            <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop" alt="office">
+            <div class="badge">Match: 80%</div>
+          </div>
+          <div class="job-body">
+            <div class="job-title">Software Engineer</div>
+            <div class="job-company">PT Quartz Clock</div>
+            <div class="job-meta">
+              <div class="job-meta-item">📍 Mulyorejo, Surabaya</div>
+              <div class="job-meta-item">💼 Full-time</div>
+              <div class="job-meta-item salary">💰 Rp8.000.000 - Rp10.000.000</div>
+            </div>
+            <a class="see-more" href="#">SEE MORE</a>
+          </div>
+        </div>
+
+        <div class="job-card">
+          <div class="media">
+            <img src="https://images.unsplash.com/photo-1496568816309-51d7c20e3b21?w=400&h=300&fit=crop" alt="office">
+            <div class="badge">Match: 80%</div>
+          </div>
+          <div class="job-body">
+            <div class="job-title">Software Engineer</div>
+            <div class="job-company">PT Quartz Clock</div>
+            <div class="job-meta">
+              <div class="job-meta-item">📍 Mulyorejo, Surabaya</div>
+              <div class="job-meta-item">💼 Full-time</div>
+              <div class="job-meta-item salary">💰 Rp8.000.000</div>
+            </div>
+            <a class="see-more" href="#">SEE MORE</a>
+          </div>
+        </div>
+
+        <div class="job-card">
+          <div class="media">
+            <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&h=300&fit=crop" alt="office">
+            <div class="badge">Match: 80%</div>
+          </div>
+          <div class="job-body">
+            <div class="job-title">Software Engineer</div>
+            <div class="job-company">PT Quartz Clock</div>
+            <div class="job-meta">
+              <div class="job-meta-item">📍 Mulyorejo, Surabaya</div>
+              <div class="job-meta-item">💼 Full-time</div>
+              <div class="job-meta-item salary">💰 Rp8.000.000</div>
+            </div>
+            <a class="see-more" href="#">SEE MORE</a>
+          </div>
+        </div>
+
+        <div class="job-card">
+          <div class="media">
+            <img src="https://images.unsplash.com/photo-1577495508048-b635879837f1?w=400&h=300&fit=crop" alt="office">
+            <div class="badge">Match: 80%</div>
+          </div>
+          <div class="job-body">
+            <div class="job-title">Software Engineer</div>
+            <div class="job-company">PT Quartz Clock</div>
+            <div class="job-meta">
+              <div class="job-meta-item">📍 Mulyorejo, Surabaya</div>
+              <div class="job-meta-item">💼 Full-time</div>
+              <div class="job-meta-item salary">💰 Rp8.000.000 - Rp10.000.000</div>
+            </div>
+            <a class="see-more" href="#">SEE MORE</a>
+          </div>
+        </div>
+
+        <div class="job-card">
+          <div class="media">
+            <img src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&h=300&fit=crop" alt="office">
+            <div class="badge">Match: 80%</div>
+          </div>
+          <div class="job-body">
+            <div class="job-title">Software Engineer</div>
+            <div class="job-company">PT Quartz Clock</div>
+            <div class="job-meta">
+              <div class="job-meta-item">📍 Mulyorejo, Surabaya</div>
+              <div class="job-meta-item">💼 Full-time</div>
+              <div class="job-meta-item salary">💰 Rp8.000.000</div>
+            </div>
+            <a class="see-more" href="#">SEE MORE</a>
+          </div>
+        </div>
+
+        <div class="job-card">
+          <div class="media">
+            <img src="https://images.unsplash.com/photo-1524813686514-a57563d77965?w=400&h=300&fit=crop" alt="office">
+            <div class="badge">Match: 80%</div>
+          </div>
+          <div class="job-body">
+            <div class="job-title">Software Engineer</div>
+            <div class="job-company">PT Quartz Clock</div>
+            <div class="job-meta">
+              <div class="job-meta-item">📍 Mulyorejo, Surabaya</div>
+              <div class="job-meta-item">💼 Full-time</div>
+              <div class="job-meta-item salary">💰 Rp8.000.000 - Rp10.000.000</div>
+            </div>
+            <a class="see-more" href="#">SEE MORE</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    © MatchMyCV 2025. All Rights Reserved.
+  </footer>
+</body>
+</html>
