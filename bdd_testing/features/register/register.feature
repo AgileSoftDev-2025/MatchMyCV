@@ -8,6 +8,7 @@ Feature: Register
   #   - Email must be valid and unique
   #   - Password must match confirmation
   #   - Password must be at least 8 characters
+  # 
 
   Scenario: Register Success
     Given I am on the "/register" page
