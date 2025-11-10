@@ -7,15 +7,10 @@ import gdown
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
 from sentence_transformers import SentenceTransformer, util
 
-# ==============================================
-# KONFIGURASI
-# ==============================================
+
 JOBSTREET_DRIVE_LINK = "https://docs.google.com/spreadsheets/d/1SasbACsxdJvFtZFxQFwQXZC05nQY3yX1/edit?gid=2108825113"
 OUTPUT_EXCEL = "Hasil_Kecocokan_Semantik_CV_vs_Job.xlsx"
 
-# ==============================================
-# UTILITAS
-# ==============================================
 def get_drive_spreadsheet(drive_link: str, output_name: str):
     file_id = drive_link.split("/d/")[1].split("/")[0]
     export_url = f"https://docs.google.com/spreadsheets/d/{file_id}/export?format=xlsx"
