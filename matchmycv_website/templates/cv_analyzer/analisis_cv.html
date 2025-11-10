@@ -1,579 +1,165 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MatchMyCV - Match Your CV</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    
-    html { font-size: 16px; }
-    body { background: #e1edf7; color: #0f172a; }
+{% extends "base.html" %}
+{% load static %}
 
-    /* NAVBAR */
-    .navbar {
-      height: 4.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 2rem;
-      border-bottom: 1px solid #e2e8f0;
-      position: sticky;
-      top: 0;
-      background: #fff;
-      z-index: 20;
-    }
-    .navbar-left {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .brand img {
-      height: 2.25rem;
-      width: auto;
-    }
-    .nav-links {
-      display: flex;
-      gap: 1.75rem;
-      align-items: center;
-    }
-    .nav-links a, .sidebar-links a {
-      color: #64748b;
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-    .nav-links a {
-      font-size: 0.9375rem;
-    }
-    .nav-links a:hover, .nav-links a.active {
-      color: #2563eb;
-      font-weight: 700;
-    }
-    .profile-pic {
-      width: 2.25rem;
-      height: 2.25rem;
-      border-radius: 50%;
-      border: 2px solid #e2e8f0;
-    }
+{% block title %}Match Your CV · MatchMyCV{% endblock %}
 
-    /* HAMBURGER MENU */
-    .hamburger {
-      display: none;
-      flex-direction: column;
-      cursor: pointer;
-      gap: 0.375rem;
-    }
-    .hamburger span {
-      width: 1.5rem;
-      height: 0.1875rem;
-      background: #64748b;
-      border-radius: 0.125rem;
-      transition: all 0.3s;
-    }
-    .hamburger.active span:nth-child(1) {
-      transform: rotate(45deg) translate(0.5rem, 0.5rem);
-    }
-    .hamburger.active span:nth-child(2) {
-      opacity: 0;
-    }
-    .hamburger.active span:nth-child(3) {
-      transform: rotate(-45deg) translate(0.5rem, -0.5rem);
-    }
+{% block extra_head %}{% endblock %}
 
-    /* SIDEBAR */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: -100%;
-      width: 75%;
-      max-width: 18.75rem;
-      height: 100vh;
-      background: #fff;
-      box-shadow: 0.125rem 0 1rem rgba(0,0,0,0.1);
-      transition: left 0.3s ease;
-      z-index: 30;
-      padding: 1.5rem;
-    }
-    .sidebar.open { left: 0; }
-    .sidebar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    .sidebar-header img { height: 2rem; }
-    .close-btn {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      color: #64748b;
-      cursor: pointer;
-      padding: 0;
-      width: 2rem;
-      height: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .sidebar-links {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      margin-top: 0.5rem;
-    }
-    .sidebar-links a {
-      font-size: 1rem;
-      font-weight: 500;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      transition: background 0.2s;
-    }
-    .sidebar-links a:hover, .sidebar-links a.active {
-      background: #f1f5f9;
-      color: #2563eb;
-      font-weight: 700;
-    }
-    .sidebar-profile {
-      margin: 0 0 1.5rem 0;
-      padding: 0 0 1.5rem 0;
-      border-bottom: 1px solid #e2e8f0;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    .sidebar-profile img {
-      width: 2.5rem;
-      height: 2.5rem;
-      border-radius: 50%;
-      border: 2px solid #e2e8f0;
-    }
-    .sidebar-profile-info { flex: 1; }
-    .sidebar-profile-name {
-      font-weight: 600;
-      font-size: 0.875rem;
-      color: #0f172a;
-    }
-    .sidebar-profile-email {
-      font-size: 0.75rem;
-      color: #64748b;
-    }
-    
-    /* OVERLAY */
-    .overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100vh;
-      background: rgba(0,0,0,0.5);
-      z-index: 25;
-    }
-    .overlay.show { display: block; }
-
-    /* MAIN */
-    .main-content {
-      min-height: calc(100vh - 8.375rem);
-      padding: 3.75rem 5%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .container {
-      max-width: 56.25rem;
-      width: 100%;
-    }
-
-    /* HEADER */
-    .page-header {
-      text-align: center;
-      margin-bottom: 3rem;
-    }
-    .page-title {
-      color: #2563eb;
-      font-weight: 700;
-      font-size: 2.625rem;
-      margin-bottom: 0.75rem;
-      line-height: 1.2;
-    }
-    .page-subtitle {
-      color: #1e293b;
-      font-size: 1.125rem;
-      line-height: 1.5;
-    }
-
-    /* FORM */
-    .form-group { margin-bottom: 2rem; }
-    .form-label {
-      display: block;
-      color: #0f172a;
-      font-weight: 600;
-      font-size: 1.0625rem;
-      margin-bottom: 0.75rem;
-    }
-    .form-select {
-      width: 100%;
-      padding: 0.875rem 1rem 0.875rem 1rem;
-      border: 2px solid #bcbcbd;
-      border-radius: 0.625rem;
-      font-size: 0.9375rem;
-      color: #6f7379;
-      font-style: italic;
-      background: #ffffff url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%2364748b%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e') no-repeat right 1rem center;
-      background-size: 1.25rem;
-      padding-right: 2.5rem;
-      cursor: pointer;
-      appearance: none;
-      transition: border-color 0.2s;
-    }
-    .form-select option {
-      font-size: 0.8125rem;
-      padding: 0.375rem 0.5rem;
-    }
-    .form-select:focus {
-      outline: none;
-      border-color: #2563eb;
-    }
-    .form-select.selected {
-      font-style: normal;
-      color: #0f172a;
-    }
-
-    /* SECTIONS */
-    .upload-section, .analyze-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    /* BUTTONS */
-    .upload-btn, .analyze-btn {
-      background: #2563eb;
-      color: #fff;
-      padding: 0.9375rem 3.4375rem;
-      border-radius: 0.625rem;
-      font-weight: 600;
-      font-size: 1.25rem;
-      border: none;
-      cursor: pointer;
-      margin-bottom: 0.75rem;
-      transition: background 0.2s;
-    }
-    .upload-btn:hover, .analyze-btn:hover {
-      background: #1d4ed8;
-    }
-
-    /* FILE CARD */
-    .file-card {
-      display: none;
-      width: 100%;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 0.75rem;
-    }
-    .file-card.show { display: flex; }
-    .file-display {
-      background: #fff;
-      border: 2px solid #e2e8f0;
-      border-radius: 0.75rem;
-      padding: 1rem 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.875rem;
-      max-width: 25rem;
-      width: 70%;
-      box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,0.06);
-    }
-    .pdf-icon {
-      background: #525151;
-      border-radius: 0.5rem;
-      padding: 0.625rem;
-      flex-shrink: 0;
-    }
-    .pdf-icon svg {
-      width: 1.5rem;
-      height: 1.5rem;
-      color: #fff;
-      display: block;
-    }
-    .file-info {
-      flex: 1;
-      min-width: 0;
-    }
-    .file-name {
-      color: #0f172a;
-      font-weight: 600;
-      font-size: 0.875rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-bottom: 0.125rem;
-    }
-    .file-size {
-      color: #64748b;
-      font-size: 0.75rem;
-    }
-    .remove-btn {
-      background: #475569;
-      border: none;
-      border-radius: 50%;
-      width: 1.75rem;
-      height: 1.75rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      flex-shrink: 0;
-      transition: background 0.2s;
-    }
-    .remove-btn:hover { background: #334155; }
-    .remove-btn svg {
-      width: 0.875rem;
-      height: 0.875rem;
-      color: #fff;
-    }
-
-    /* TEXT */
-    .supported-text {
-      color: #64748b;
-      font-size: 0.875rem;
-    }
-
-    /* FOOTER */
-    footer {
-      padding: 1.5625rem;
-      text-align: center;
-      color: #64748b;
-      border-top: 1px solid #c5c9ce;
-      font-size: 0.875rem;
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 768px) {
-      html { font-size: 15px; }
-      .navbar { 
-        height: 4rem;
-        padding: 0 1rem; 
-      }
-      .nav-links { display: none; }
-      .hamburger { display: flex; }
-      .page-header { margin-bottom: 2.5rem; }
-      .page-title { font-size: 2rem; }
-    }
-
-    @media (max-width: 480px) {
-      html { font-size: 14px; }
-      .navbar {
-        height: 4rem;
-        padding: 0 0.75rem;
-      }
-      .main-content { padding: 2.5rem 5%; }
-      .page-header { margin-bottom: 2rem; }
-      .page-title { font-size: 1.75rem; }
-      .form-group { margin-bottom: 1.5rem; }
-      .upload-btn, .analyze-btn {
-        padding: 0.75rem 2.5rem;
-        font-size: 1.125rem;
-      }
-      .file-display {
-        padding: 0.75rem 1rem;
-        gap: 0.625rem;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
-
-  <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <img src="https://via.placeholder.com/120x40/2563eb/ffffff?text=MatchMyCV" alt="MatchMyCV">
-      <button class="close-btn" onclick="closeSidebar()">×</button>
-    </div>
-    <div class="sidebar-profile">
-      <img src="https://i.pravatar.cc/150?img=12" alt="profile">
-      <div class="sidebar-profile-info">
-        <div class="sidebar-profile-name">John Doe</div>
-        <div class="sidebar-profile-email">john@example.com</div>
-      </div>
-    </div>
-    <div class="sidebar-links">
-      <a href="#" onclick="setActive(event)">Home</a>
-      <a href="#" class="active" onclick="setActive(event)">Analyze CV</a>
-      <a href="#" onclick="setActive(event)">About Us</a>
-      <a href="#" onclick="setActive(event)">FAQ</a>
-    </div>
-  </div>
-
-  <div class="navbar">
-    <div class="navbar-left">
-      <div class="hamburger" id="hamburger" onclick="toggleSidebar()">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-      <div class="brand">
-        <img src="https://via.placeholder.com/120x40/2563eb/ffffff?text=MatchMyCV" alt="MatchMyCV">
-      </div>
-    </div>
-    <div class="nav-links">
-      <a href="#">Home</a>
-      <a href="#" class="active">Analyze CV</a>
-      <a href="#">About Us</a>
-      <a href="#">FAQ</a>
-      <img src="https://i.pravatar.cc/150?img=12" alt="profile" class="profile-pic">
-    </div>
-  </div>
-
-  <main class="main-content">
-    <div class="container">
-      <div class="page-header">
-        <h1 class="page-title">Match Your CV</h1>
-        <p class="page-subtitle">Find the best job matches for your CV instantly.</p>
+{% block content %}
+  <main class="min-h-[calc(100vh-8.375rem)] py-12 px-[5%] flex items-center justify-center">
+    <div class="w-full max-w-[900px]">
+      <!-- Header -->
+      <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-blue-600 leading-tight mb-3 md:text-[2.625rem]">Match Your CV</h1>
+        <p class="text-slate-800 text-base md:text-lg leading-relaxed">Find the best job matches for your CV instantly.</p>
       </div>
 
-      <div class="form-group">
-        <label class="form-label" for="location">Location</label>
-        <select id="location" class="form-select selected">
-          <option value="all">All Locations</option>
-          <option value="jakarta">Jakarta</option>
-          <option value="surabaya">Surabaya</option>
-          <option value="bandung">Bandung</option>
-          <option value="medan">Medan</option>
-          <option value="semarang">Semarang</option>
-          <option value="makassar">Makassar</option>
-          <option value="yogyakarta">Yogyakarta</option>
-          <option value="bali">Bali</option>
-          <option value="remote">Remote</option>
-        </select>
+      <!-- Location -->
+      <div class="mb-8">
+        <label for="location" class="block text-slate-900 font-semibold text-[17px] mb-3">Location</label>
+
+        <div class="relative">
+          <select
+            id="location"
+            class="w-full px-4 py-3 pr-10 rounded-xl border-2 border-[#bcbcbd] text-[15px] text-slate-700 bg-white outline-none transition
+                   focus:border-blue-600 appearance-none"
+          >
+            <option value="all">All Locations</option>
+            <option value="jakarta">Jakarta</option>
+            <option value="surabaya">Surabaya</option>
+            <option value="bandung">Bandung</option>
+            <option value="medan">Medan</option>
+            <option value="semarang">Semarang</option>
+            <option value="makassar">Makassar</option>
+            <option value="yogyakarta">Yogyakarta</option>
+            <option value="bali">Bali</option>
+            <option value="remote">Remote</option>
+          </select>
+
+          <!-- Chevron -->
+          <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+          </svg>
+        </div>
       </div>
 
-      <div class="upload-section">
-        <input type="file" id="cv-upload" accept=".pdf" style="display: none;">
-        <button type="button" class="upload-btn" id="upload-btn" onclick="document.getElementById('cv-upload').click()">
+      <!-- Upload -->
+      <div class="flex flex-col items-center">
+        <input type="file" id="cv-upload" accept=".pdf" class="hidden">
+
+        <button
+          type="button"
+          id="upload-btn"
+          onclick="document.getElementById('cv-upload').click()"
+          class="inline-flex items-center justify-center rounded-xl bg-blue-600 text-white font-semibold text-xl px-14 py-3 transition
+                 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
           Upload CV
         </button>
       </div>
 
-      <div class="file-card" id="file-card">
-        <div class="file-display">
-          <div class="pdf-icon">
-            <svg fill="currentColor" viewBox="0 0 20 20">
+      <!-- File card -->
+      <div id="file-card" class="hidden w-full flex items-center justify-center mt-3 mb-3">
+        <div class="w-[70%] max-w-[400px] bg-white border-2 border-slate-200 rounded-xl px-5 py-4 flex items-center gap-3 shadow-sm">
+          <div class="bg-neutral-600 rounded-lg p-2.5 flex-shrink-0">
+            <svg class="w-6 h-6 text-white" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"/>
             </svg>
           </div>
-          <div class="file-info">
-            <div class="file-name" id="display-filename">My CV.pdf</div>
-            <div class="file-size" id="display-filesize">3.5 MB</div>
+
+          <div class="min-w-0 flex-1">
+            <div id="display-filename" class="text-slate-900 font-semibold text-sm truncate">My CV.pdf</div>
+            <div id="display-filesize" class="text-slate-500 text-xs">3.5 MB</div>
           </div>
-          <button type="button" class="remove-btn" onclick="removeFile()">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+          <button
+            type="button"
+            onclick="removeFile()"
+            class="flex items-center justify-center w-7 h-7 rounded-full bg-slate-600 hover:bg-slate-700 transition focus:outline-none"
+            aria-label="Remove file"
+          >
+            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
           </button>
         </div>
       </div>
 
-      <div class="analyze-section">
-        <button type="button" class="analyze-btn" id="analyze-btn" style="display: none;">
+      <!-- Analyze -->
+      <div class="flex flex-col items-center">
+        <button
+          type="button"
+          id="analyze-btn"
+          class="hidden inline-flex items-center justify-center rounded-xl bg-blue-600 text-white font-semibold text-xl px-14 py-3 transition
+                 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
           Analyze
         </button>
-        <p class="supported-text">Supported format: PDF (max. 10 MB)</p>
-      </div> 
+        <p class="text-slate-500 text-sm mt-2">Supported format: PDF (max. 10 MB)</p>
+      </div>
     </div>
   </main>
+{% endblock %}
 
-  <footer>© MatchMyCV 2025. All Rights Reserved.</footer>
-
-  <script>
+{% block extra_js %}
+<script>
+  (function () {
     const els = {
-      sidebar: document.getElementById('sidebar'),
-      overlay: document.getElementById('overlay'),
-      hamburger: document.getElementById('hamburger'),
       fileInput: document.getElementById('cv-upload'),
       uploadBtn: document.getElementById('upload-btn'),
       fileCard: document.getElementById('file-card'),
       analyzeBtn: document.getElementById('analyze-btn'),
-      locationSelect: document.getElementById('location')
+      fileName: document.getElementById('display-filename'),
+      fileSize: document.getElementById('display-filesize'),
+      locationSelect: document.getElementById('location'),
     };
-    
+
     let uploadedFile = null;
 
-    function toggleSidebar() {
-      els.sidebar.classList.toggle('open');
-      els.overlay.classList.toggle('show');
-      els.hamburger.classList.toggle('active');
-    }
-
-    function closeSidebar() {
-      els.sidebar.classList.remove('open');
-      els.overlay.classList.remove('show');
-      els.hamburger.classList.remove('active');
-    }
-
-    function setActive(e) {
-      e.preventDefault();
-      document.querySelectorAll('.sidebar-links a, .nav-links a').forEach(link => link.classList.remove('active'));
-      e.target.classList.add('active');
-      const text = e.target.textContent;
-      document.querySelectorAll('.nav-links a').forEach(link => {
-        if (link.textContent === text) link.classList.add('active');
-      });
-      closeSidebar();
-    }
-
-    function removeFile() {
-      uploadedFile = null;
-      els.fileInput.value = '';
-      els.uploadBtn.style.display = 'block';
-      els.fileCard.classList.remove('show');
-      els.analyzeBtn.style.display = 'none';
-    }
+    function show(el) { el.classList.remove('hidden'); }
+    function hide(el) { el.classList.add('hidden'); }
 
     function checkFormValidity() {
-      els.analyzeBtn.style.display = uploadedFile ? 'block' : 'none';
+      if (uploadedFile) { show(els.analyzeBtn); }
+      else { hide(els.analyzeBtn); }
     }
 
+    window.removeFile = function () {
+      uploadedFile = null;
+      els.fileInput.value = '';
+      show(els.uploadBtn);
+      hide(els.fileCard);
+      hide(els.analyzeBtn);
+    };
+
     els.fileInput.addEventListener('change', function(e) {
-      const file = e.target.files[0];
+      const file = e.target.files?.[0];
       if (!file) return;
-      
+
       if (file.size > 10 * 1024 * 1024) {
         alert('File size exceeds 10 MB limit');
         return;
       }
-      
       if (file.type !== 'application/pdf') {
         alert('Please upload a PDF file');
         return;
       }
-      
+
       uploadedFile = file;
-      els.uploadBtn.style.display = 'none';
-      els.fileCard.classList.add('show');
-      document.getElementById('display-filename').textContent = file.name;
-      document.getElementById('display-filesize').textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB`;
+      hide(els.uploadBtn);
+      show(els.fileCard);
+      els.fileName.textContent = file.name;
+      els.fileSize.textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB`;
       checkFormValidity();
     });
 
-    els.locationSelect.addEventListener('change', function() {
-      this.classList.toggle('selected', !!this.value);
-      checkFormValidity();
-    });
+    els.locationSelect.addEventListener('change', checkFormValidity);
 
     els.analyzeBtn.addEventListener('click', function() {
-      console.log('Analyzing CV:', uploadedFile.name, 'Location:', els.locationSelect.value);
+      if (!uploadedFile) return;
+      // TODO: kirim FormData ke endpoint-mu
       alert('Analyzing your CV...');
     });
-  </script>
-</body>
-</html>
+  })();
+</script>
+{% endblock %}

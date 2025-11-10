@@ -10,20 +10,36 @@
   <style>
     :root { --bg-grid: radial-gradient(circle at 1px 1px, rgba(0,0,0,.06) 1px, transparent 1px); }
     body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
+    #flash-messages[hidden] { display: none; }
   </style>
 {% endblock %}
 
-{% block content %}
-<div class="min-h-screen w-full bg-gradient-to-br from-slate-50 via-white to-indigo-50 relative overflow-hidden">
-  <div class="pointer-events-none absolute inset-0" style="background-image:var(--bg-grid); background-size: 22px 22px;"></div>
-  <div class="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-indigo-200/40 blur-3xl"></div>
-  <div class="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-blue-200/40 blur-3xl"></div>
+<!-- Global Flash Messages (BDD-friendly) -->
+<div id="flash-messages" role="region" aria-live="polite" aria-atomic="true" class="mb-4 space-y-2" data-testid="flash-messages">
+  {% if messages %}
+    {% for message in messages %}
+      <div
+        class="rounded-md px-4 py-3 text-sm
+          {% if 'success' in message.tags %}bg-emerald-50 text-emerald-800 border border-emerald-200{% endif %}
+          {% if 'error' in message.tags %}bg-rose-50 text-rose-700 border border-rose-200{% endif %}
+          {% if 'warning' in message.tags %}bg-amber-50 text-amber-800 border border-amber-200{% endif %}
+          {% if 'info' in message.tags or 'debug' in message.tags %}bg-sky-50 text-sky-800 border border-sky-200{% endif %}"
+        data-testid="flash-message-item">
+        <span class="flash-message-text">{{ message|striptags }}</span>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="hidden" aria-hidden="true" data-testid="flash-message-empty"></div>
+  {% endif %}
+</div>
 
-  <div class="relative mx-auto max-w-6xl px-4 md:px-6 py-10 md:py-16">
+{% block content %}
+<div class="w-full bg-[#e1edf7] relative overflow-hidden">
+  <div class="relative mx-auto max-w-6xl px-4 md:px-6 py-10 md:py-5">
     <!-- Tombol Back -->
     <div class="mb-4">
-      <a href="/" class="inline-flex items-center text-sm font-medium text-[#2D63B0] hover:text-blue-700 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <a href="/" class="inline-flex items-center text-sm font-medium text-[#2D63B0] hover:text-blue-700 transition" id="back-to-home">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
         Back to landing page
@@ -33,11 +49,10 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
       <!-- Left: Form Card -->
       <div class="order-1">
-        
         <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl ring-1 ring-black/5 p-6 sm:p-8 lg:p-10">
           <!-- Logo -->
           <div class="flex items-center justify-center gap-3 mb-6">
-            <img src="{% static 'images/Logo MatchMyCV.png' %}" alt="MatchMyCV" class="h-20 w-auto">
+            <img src="{% static 'images/Logo MatchMyCV.png' %}" alt="Logo MatchMyCV" class="h-20 w-auto" id="site-logo">
           </div>
 
           <!-- Title & Subtitle -->
@@ -55,49 +70,74 @@
             </div>
           </div>
 
+          <!-- ====== BDD-Friendly Flash Messages (selalu ada di DOM) ====== -->
+          <!-- Gunakan role="alert" + aria-live agar screen reader & Selenium mudah tangkap -->
+          <div id="flash-messages" role="region" aria-live="polite" aria-atomic="true" class="mb-4 space-y-2" data-testid="flash-messages">
+            {% if messages %}
+              {% for message in messages %}
+                <div
+                  class="rounded-md px-4 py-3 text-sm
+                    {% if 'success' in message.tags %}bg-emerald-50 text-emerald-800 border border-emerald-200{% endif %}
+                    {% if 'error' in message.tags %}bg-rose-50 text-rose-700 border border-rose-200{% endif %}
+                    {% if 'warning' in message.tags %}bg-amber-50 text-amber-800 border border-amber-200{% endif %}
+                    {% if 'info' in message.tags or 'debug' in message.tags %}bg-sky-50 text-sky-800 border border-sky-200{% endif %}"
+                  data-testid="flash-message-item"
+                >
+                  <!-- Span ini teks polosnya untuk asersi BDD -->
+                  <span class="flash-message-text">{{ message|striptags }}</span>
+                </div>
+              {% endfor %}
+            {% else %}
+              <!-- Tetap render kontainer kosong supaya bisa diquery -->
+              <div class="hidden" aria-hidden="true" data-testid="flash-message-empty"></div>
+            {% endif %}
+          </div>
+          <!-- ====== END BDD-Friendly Flash Messages ====== -->
+
           <!-- Form -->
-          <form method="post" action="" class="space-y-4" novalidate>
+          <form method="post" action="{% url 'user_authentication:login' %}" class="space-y-4" id="login-form" novalidate>
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-              <div class="rounded-md bg-rose-50 border border-rose-200 px-4 py-3 text-rose-700 text-sm">
+              <div class="rounded-md bg-rose-50 border border-rose-200 px-4 py-3 text-rose-700 text-sm" data-testid="form-non-field-errors">
                 {{ form.non_field_errors|striptags }}
               </div>
             {% endif %}
 
-            <!-- Username -->
+            <!-- Email -->
             <div>
-              <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-slate-700 mb-2">
-                Email 
+              <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-slate-700 mb-2">
+                Email
               </label>
               <div class="relative">
                 <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                   <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.9V22h19.2v-2.7c0-3.3-6.4-4.9-9.6-4.9z"/>
+                    <path d="M2 6.75A2.75 2.75 0 0 1 4.75 4h14.5A2.75 2.75 0 0 1 22 6.75v10.5A2.75 2.75 0 0 1 19.25 20H4.75A2.75 2.75 0 0 1 2 17.25V6.75Zm2.75-.25a.75.75 0 0 0-.75.75v.74l7.55 4.28 7.45-4.24V7.25a.75.75 0 0 0-.75-.75H4.75Zm15.5 3.09-7.18 4.09a.75.75 0 0 1-.74 0L5.25 9.6v7.65c0 .41.34.75.75.75h12c.41 0 .75-.34.75-.75V9.59Z"/>
                   </svg>
                 </span>
 
                 <input
-                  type="text"
-                  id="{{ form.username.id_for_label }}"
-                  name="{{ form.username.html_name }}"
-                  value="{{ form.username.value|default_if_none:'' }}"
+                  type="email"
+                  id="{{ form.email.id_for_label }}"
+                  name="{{ form.email.html_name }}"
+                  value="{{ form.email.value|default_if_none:'' }}"
                   required
                   inputmode="email"
-                  autocomplete="username"
+                  autocomplete="email"
                   class="block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 pl-10 text-sm placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition"
                   placeholder="Enter your email"
                   aria-label="Email"
+                  data-testid="email-input"
                 />
               </div>
-              {% if form.username.errors %}
-                <p class="mt-1 text-sm text-rose-600">{{ form.username.errors|striptags }}</p>
+              {% if form.email.errors %}
+                <p class="mt-1 text-sm text-rose-600" data-testid="email-error">{{ form.email.errors|striptags }}</p>
               {% endif %}
             </div>
 
             <!-- Password -->
             <div>
-              <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-slate-700 mb-2">Password</label>
+              <label for="{{ form.password.id_for_label }}"  class="block text-sm font-medium text-slate-700 mb-2">Password</label>
               <div class="relative">
                 <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                   <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -114,10 +154,10 @@
                   class="block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 pl-10 pr-12 text-sm placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition"
                   placeholder="Enter your password"
                   aria-label="Password"
+                  data-testid="password-input"
                 />
 
-                <button type="button" id="togglePwd" class="absolute inset-y-0 right-0 px-3 text-slate-500 hover:text-slate-700 focus:outline-none" aria-label="Show password">
-                  <!-- eyeOpen shown initially, eyeClosed hidden -->
+                <button type="button" id="togglePwd" class="absolute inset-y-0 right-0 px-3 text-slate-500 hover:text-slate-700 focus:outline-none" aria-label="Show password" data-testid="toggle-password">
                   <svg id="eyeOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm-3-7c-4.48 0-8.27 2.94-9.54 7 1.27 4.06 5.06 7 9.54 7s8.27-2.94 9.54-7c-1.27-4.06-5.06-7-9.54-7z"/>
@@ -129,19 +169,23 @@
                 </button>
               </div>
               {% if form.password.errors %}
-                <p class="mt-1 text-sm text-rose-600">{{ form.password.errors|striptags }}</p>
+                <p class="mt-1 text-sm text-rose-600" data-testid="password-error">{{ form.password.errors|striptags }}</p>
               {% endif %}
             </div>
 
             <!-- Submit -->
-            <button type="submit" class="group w-full mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-[#2D63B0] px-4 py-3 text-white font-semibold shadow-md ring-1 ring-blue-600/10 hover:bg-blue-700 hover:shadow-lg transition">
-              <span>Sign In</span>
+            <button
+              type="submit"
+              id="login-button"
+              data-testid="login-button"
+              class="group w-full mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-[#2D63B0] px-4 py-3 text-white font-semibold shadow-md ring-1 ring-blue-600/10 hover:bg-blue-700 hover:shadow-lg transition">
+              <span>Login</span>
               <svg class="h-5 w-5 transition -translate-x-0 group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 5l7 7-7 7M5 12h14"/></svg>
             </button>
 
             <p class="text-center text-sm text-slate-600">
               Don’t have an account?
-              <a href="{% url 'user_authentication:register' %}" class="font-semibold text-[#2D63B0] hover:underline">Create one</a>
+              <a href="{% url 'user_authentication:register' %}" class="font-semibold text-[#2D63B0] hover:underline" id="create-account-link" data-testid="create-account-link">Create one</a>
             </p>
           </form>
         </div>
@@ -182,8 +226,8 @@
             <div class="px-7 sm:px-10 pb-7 sm:pb-10">
               <div class="rounded-xl bg-white/10 backdrop-blur-sm ring-1 ring-white/25 p-4">
                 <p class="text-sm sm:text-base">
-                  New here? 
-                  <a href="{% url 'user_authentication:register' %}" class="font-semibold underline underline-offset-4">
+                  New here?
+                  <a href="{% url 'user_authentication:register' %}" class="font-semibold underline underline-offset-4" id="create-account-cta">
                     Create an account</a> in minutes.
                 </p>
               </div>
@@ -215,10 +259,9 @@
         });
       }
 
-      // === SweetAlert Toast aman ===
+      // === SweetAlert toasts dari Django messages (tetap ada) ===
       const iconMap = { success: 'success', error: 'error', warning: 'warning', info: 'info', debug: 'info' };
 
-      // Ambil JSON dari <script id="messages_json">
       const toastsEl = document.getElementById('messages_json');
       const toasts = toastsEl ? JSON.parse(toastsEl.textContent || '[]') : [];
 
@@ -239,7 +282,6 @@
     })();
   </script>
 
-  <!-- ini harus di luar <script> -->
   {% if messages %}
   <script id="messages_json" type="application/json">
     [
