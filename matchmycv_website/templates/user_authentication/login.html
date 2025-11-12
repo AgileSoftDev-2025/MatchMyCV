@@ -1,90 +1,296 @@
 {% extends "base.html" %}
 {% load static %}
+
+{% block title %}Login · MatchMyCV{% endblock %}
+
+{% block extra_head %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg-grid: radial-gradient(circle at 1px 1px, rgba(0,0,0,.06) 1px, transparent 1px); }
+    body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
+    #flash-messages[hidden] { display: none; }
+  </style>
+{% endblock %}
+
+<!-- Global Flash Messages (BDD-friendly) -->
+<div id="flash-messages" role="region" aria-live="polite" aria-atomic="true" class="mb-4 space-y-2" data-testid="flash-messages">
+  {% if messages %}
+    {% for message in messages %}
+      <div
+        class="rounded-md px-4 py-3 text-sm
+          {% if 'success' in message.tags %}bg-emerald-50 text-emerald-800 border border-emerald-200{% endif %}
+          {% if 'error' in message.tags %}bg-rose-50 text-rose-700 border border-rose-200{% endif %}
+          {% if 'warning' in message.tags %}bg-amber-50 text-amber-800 border border-amber-200{% endif %}
+          {% if 'info' in message.tags or 'debug' in message.tags %}bg-sky-50 text-sky-800 border border-sky-200{% endif %}"
+        data-testid="flash-message-item">
+        <span class="flash-message-text">{{ message|striptags }}</span>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="hidden" aria-hidden="true" data-testid="flash-message-empty"></div>
+  {% endif %}
+</div>
+
 {% block content %}
-<div class="w-full max-w-md mx-auto p-4">
-  <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-lg p-8">
-    <!-- Logo -->
-    <div class="flex items-center justify-center mb-8">
-      <img src="{% static 'images/Logo MatchMyCV.png' %}" alt="MatchMyCV Logo" class="w-30 h-20 object-contain">
+<div class="w-full bg-[#e1edf7] relative overflow-hidden">
+  <div class="relative mx-auto max-w-6xl px-4 md:px-6 py-10 md:py-5">
+    <!-- Tombol Back -->
+    <div class="mb-4">
+      <a href="/" class="inline-flex items-center text-sm font-medium text-[#2D63B0] hover:text-blue-700 transition" id="back-to-home">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to landing page
+      </a>
     </div>
 
-    <!-- Form -->
-    <form method="post" action="">
-      {% csrf_token %}
-      <!-- Email -->
-      <div class="mb-5">
-        <label for="email" class="block text-gray-800 font-medium mb-2">Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          class="w-full px-4 py-3 rounded-lg border-2 border-blue-300 focus:border-blue-500 focus:outline-none bg-white transition-colors"
-          required
-        >
-      </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
+      <!-- Left: Form Card -->
+      <div class="order-1">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl ring-1 ring-black/5 p-6 sm:p-8 lg:p-10">
+          <!-- Logo -->
+          <div class="flex items-center justify-center gap-3 mb-6">
+            <img src="{% static 'images/Logo MatchMyCV.png' %}" alt="Logo MatchMyCV" class="h-20 w-auto" id="site-logo">
+          </div>
 
-      <!-- Password -->
-      <div class="mb-5">
-        <label for="password" class="block text-gray-800 font-medium mb-2">Password</label>
-        <div class="relative">
-          <input
-            type="password"
-            id="password"
-            name="password"
-            class="w-full px-4 py-3 rounded-lg border-2 border-blue-300 focus:border-blue-500 focus:outline-none bg-white transition-colors pr-12"
-            required
-          >
-          <button
-            type="button"
-            onclick="togglePassword()"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-blue-600 hover:text-blue-700 transition-colors"
-            aria-label="Toggle password visibility"
-          >
-            <svg id="eye-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
-            </svg>
-          </button>
+          <!-- Title & Subtitle -->
+          <div class="text-center mb-6">
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">Sign in to your account</h1>
+          </div>
+
+          <!-- Divider -->
+          <div class="relative my-6">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-slate-200"></div>
+            </div>
+            <div class="relative flex justify-center">
+              <span class="bg-white px-3 text-xs font-medium text-slate-500">Welcome back! Please enter your details</span>
+            </div>
+          </div>
+
+          <!-- ====== BDD-Friendly Flash Messages (selalu ada di DOM) ====== -->
+          <!-- Gunakan role="alert" + aria-live agar screen reader & Selenium mudah tangkap -->
+          <div id="flash-messages" role="region" aria-live="polite" aria-atomic="true" class="mb-4 space-y-2" data-testid="flash-messages">
+            {% if messages %}
+              {% for message in messages %}
+                <div
+                  class="rounded-md px-4 py-3 text-sm
+                    {% if 'success' in message.tags %}bg-emerald-50 text-emerald-800 border border-emerald-200{% endif %}
+                    {% if 'error' in message.tags %}bg-rose-50 text-rose-700 border border-rose-200{% endif %}
+                    {% if 'warning' in message.tags %}bg-amber-50 text-amber-800 border border-amber-200{% endif %}
+                    {% if 'info' in message.tags or 'debug' in message.tags %}bg-sky-50 text-sky-800 border border-sky-200{% endif %}"
+                  data-testid="flash-message-item"
+                >
+                  <!-- Span ini teks polosnya untuk asersi BDD -->
+                  <span class="flash-message-text">{{ message|striptags }}</span>
+                </div>
+              {% endfor %}
+            {% else %}
+              <!-- Tetap render kontainer kosong supaya bisa diquery -->
+              <div class="hidden" aria-hidden="true" data-testid="flash-message-empty"></div>
+            {% endif %}
+          </div>
+          <!-- ====== END BDD-Friendly Flash Messages ====== -->
+
+          <!-- Form -->
+          <form method="post" action="{% url 'user_authentication:login' %}" class="space-y-4" id="login-form" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+              <div class="rounded-md bg-rose-50 border border-rose-200 px-4 py-3 text-rose-700 text-sm" data-testid="form-non-field-errors">
+                {{ form.non_field_errors|striptags }}
+              </div>
+            {% endif %}
+
+            <!-- Email -->
+            <div>
+              <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-slate-700 mb-2">
+                Email
+              </label>
+              <div class="relative">
+                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M2 6.75A2.75 2.75 0 0 1 4.75 4h14.5A2.75 2.75 0 0 1 22 6.75v10.5A2.75 2.75 0 0 1 19.25 20H4.75A2.75 2.75 0 0 1 2 17.25V6.75Zm2.75-.25a.75.75 0 0 0-.75.75v.74l7.55 4.28 7.45-4.24V7.25a.75.75 0 0 0-.75-.75H4.75Zm15.5 3.09-7.18 4.09a.75.75 0 0 1-.74 0L5.25 9.6v7.65c0 .41.34.75.75.75h12c.41 0 .75-.34.75-.75V9.59Z"/>
+                  </svg>
+                </span>
+
+                <input
+                  type="email"
+                  id="{{ form.email.id_for_label }}"
+                  name="{{ form.email.html_name }}"
+                  value="{{ form.email.value|default_if_none:'' }}"
+                  required
+                  inputmode="email"
+                  autocomplete="email"
+                  class="block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 pl-10 text-sm placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition"
+                  placeholder="Enter your email"
+                  aria-label="Email"
+                  data-testid="email-input"
+                />
+              </div>
+              {% if form.email.errors %}
+                <p class="mt-1 text-sm text-rose-600" data-testid="email-error">{{ form.email.errors|striptags }}</p>
+              {% endif %}
+            </div>
+
+            <!-- Password -->
+            <div>
+              <label for="{{ form.password.id_for_label }}"  class="block text-sm font-medium text-slate-700 mb-2">Password</label>
+              <div class="relative">
+                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 8V7a3 3 0 116 0v3H9z"/>
+                  </svg>
+                </span>
+
+                <input
+                  type="password"
+                  id="{{ form.password.id_for_label }}"
+                  name="{{ form.password.html_name }}"
+                  required
+                  autocomplete="current-password"
+                  class="block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 pl-10 pr-12 text-sm placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition"
+                  placeholder="Enter your password"
+                  aria-label="Password"
+                  data-testid="password-input"
+                />
+
+                <button type="button" id="togglePwd" class="absolute inset-y-0 right-0 px-3 text-slate-500 hover:text-slate-700 focus:outline-none" aria-label="Show password" data-testid="toggle-password">
+                  <svg id="eyeOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm-3-7c-4.48 0-8.27 2.94-9.54 7 1.27 4.06 5.06 7 9.54 7s8.27-2.94 9.54-7c-1.27-4.06-5.06-7-9.54-7z"/>
+                  </svg>
+                  <svg id="eyeClosed" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M3 3l3.59 3.59M10.7 10.7a3 3 0 104.24 4.24M2.46 12C3.73 7.94 7.52 5 12 5c4.48 0 8.27 2.94 9.54 7-1.27 4.06-5.06 7-9.54 7-1.48 0-2.88-.34-4.13-.94M20.41 20.41L17 17"/>
+                  </svg>
+                </button>
+              </div>
+              {% if form.password.errors %}
+                <p class="mt-1 text-sm text-rose-600" data-testid="password-error">{{ form.password.errors|striptags }}</p>
+              {% endif %}
+            </div>
+
+            <!-- Submit -->
+            <button
+              type="submit"
+              id="login-button"
+              data-testid="login-button"
+              class="group w-full mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-[#2D63B0] px-4 py-3 text-white font-semibold shadow-md ring-1 ring-blue-600/10 hover:bg-blue-700 hover:shadow-lg transition">
+              <span>Login</span>
+              <svg class="h-5 w-5 transition -translate-x-0 group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 5l7 7-7 7M5 12h14"/></svg>
+            </button>
+
+            <p class="text-center text-sm text-slate-600">
+              Don’t have an account?
+              <a href="{% url 'user_authentication:register' %}" class="font-semibold text-[#2D63B0] hover:underline" id="create-account-link" data-testid="create-account-link">Create one</a>
+            </p>
+          </form>
         </div>
       </div>
 
-      <!-- Forgot -->
+      <!-- Right -->
+      <aside class="order-2">
+        <div class="relative rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-600 via-blue-600 to-sky-500 text-white shadow-xl min-h-[28rem] md:min-h-[32rem] lg:min-h-full">
+          <div class="absolute inset-0 opacity-10" style="background-image:url('https://images.unsplash.com/photo-1521790361543-f645cf042ec4?q=80&w=1200&auto=format&fit=crop'); background-size:cover; background-position:center;"></div>
 
+          <div class="relative flex flex-col justify-between">
+            <div class="p-7 sm:p-10">
+              <h2 class="text-2xl sm:text-3xl font-bold leading-tight">Find the right job faster with MatchMyCV</h2>
+              <p class="mt-3 text-white/90 text-sm sm:text-base max-w-md">
+                Upload your CV, let our system analyze your skills and experience, and get personalized job recommendations that truly match your profile.
+              </p>
 
-      <!-- Submit -->
-      <button
-        type="submit"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
-      >
-        Sign In
-      </button>
+              <ul class="mt-6 space-y-3 text-sm sm:text-base">
+                <li class="flex items-start gap-3">
+                  <span class="mt-0.5 inline-flex h-6 w-8 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/30">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.5-1.5z"/>
+                    </svg>
+                  </span>
+                  <span>AI-powered CV analysis that understands your strengths and key skills.</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="mt-0.5 inline-flex h-6 w-8 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/30">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.5-1.5z"/>
+                    </svg>
+                  </span>
+                  <span>Smart job recommendations that align with your career goals.</span>
+                </li>
+              </ul>
+            </div>
 
-      <!-- Divider -->
-      <div class="my-6 border-t border-gray-300"></div>
+            <div class="px-7 sm:px-10 pb-7 sm:pb-10">
+              <div class="rounded-xl bg-white/10 backdrop-blur-sm ring-1 ring-white/25 p-4">
+                <p class="text-sm sm:text-base">
+                  New here?
+                  <a href="{% url 'user_authentication:register' %}" class="font-semibold underline underline-offset-4" id="create-account-cta">
+                    Create an account</a> in minutes.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
 
-      <!-- Register -->
-
-    </form>
+    </div>
   </div>
 </div>
+{% endblock %}
 
-<script>
-function togglePassword() {
-  const passwordInput = document.getElementById('password');
-  const eyeIcon = document.getElementById('eye-icon');
+{% block extra_js %}
+  <script>
+    (function () {
+      // === Toggle password ===
+      const btn = document.getElementById('togglePwd');
+      if (btn) {
+        const eyeOpen = document.getElementById('eyeOpen');
+        const eyeClosed = document.getElementById('eyeClosed');
+        let pwd = document.getElementById('{{ form.password.id_for_label|default:"id_password" }}');
+        btn.addEventListener('click', function () {
+          if (!pwd) return;
+          const isHidden = pwd.getAttribute('type') === 'password';
+          pwd.setAttribute('type', isHidden ? 'text' : 'password');
+          eyeOpen.classList.toggle('hidden', !isHidden);
+          eyeClosed.classList.toggle('hidden', isHidden);
+        });
+      }
 
-  if (passwordInput.type === 'password') {
-    passwordInput.type = 'text';
-    eyeIcon.innerHTML = `
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-    `;
-  } else {
-    passwordInput.type = 'password';
-    eyeIcon.innerHTML = `
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
-    `;
-  }
-}
-</script>
+      // === SweetAlert toasts dari Django messages (tetap ada) ===
+      const iconMap = { success: 'success', error: 'error', warning: 'warning', info: 'info', debug: 'info' };
+
+      const toastsEl = document.getElementById('messages_json');
+      const toasts = toastsEl ? JSON.parse(toastsEl.textContent || '[]') : [];
+
+      if (Array.isArray(toasts) && toasts.length > 0) {
+        toasts.forEach(m => {
+          const icon = iconMap[m.level] || 'info';
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: icon,
+            title: m.text,
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true
+          });
+        });
+      }
+    })();
+  </script>
+
+  {% if messages %}
+  <script id="messages_json" type="application/json">
+    [
+      {% for message in messages %}
+        { "level": "{{ message.tags|escapejs }}", "text": "{{ message|striptags|escapejs }}" }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]
+  </script>
+  {% else %}
+  <script id="messages_json" type="application/json">[]</script>
+  {% endif %}
 {% endblock %}
