@@ -1,27 +1,86 @@
 import fitz
 import json
 import re
-import os
 import pandas as pd
 import gdown
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
 from sentence_transformers import SentenceTransformer, util
+import torch
+import os
 
+# ==============================================
+# KONFIGURASI FILE DAN DATASET
+# ==============================================
 JOBSTREET_DRIVE_LINK = "https://docs.google.com/spreadsheets/d/1SasbACsxdJvFtZFxQFwQXZC05nQY3yX1/edit?gid=2108825113"
-OUTPUT_EXCEL = "Hasil_Kecocokan_Semantik_CV_vs_Job.xlsx"
 
-
-def get_drive_spreadsheet(drive_link: str, output_name: str):
+def get_drive_spreadsheet(drive_link, output_name):
     file_id = drive_link.split("/d/")[1].split("/")[0]
     export_url = f"https://docs.google.com/spreadsheets/d/{file_id}/export?format=xlsx"
-    print(f"Mengunduh data dari Google Drive...")
     gdown.download(export_url, output_name, quiet=False)
     return output_name
 
+job_file = get_drive_spreadsheet(JOBSTREET_DRIVE_LINK, "data_jobstreet.xlsx")
+df_jobs = pd.read_excel(job_file)
+
+# ==============================================
+# LOAD MODEL
+# ==============================================
+print("Memuat model umum...")
+model_general = AutoModelForTokenClassification.from_pretrained("cahya/bert-base-indonesian-NER")
+tokenizer_general = AutoTokenizer.from_pretrained("cahya/bert-base-indonesian-NER")
+ner_general = pipeline("ner", model=model_general, tokenizer=tokenizer_general, grouped_entities=True)
+
+print("Memuat model skill...")
+model_skill = AutoModelForTokenClassification.from_pretrained("iqbalrahmananda/my-indo-bert-skill")
+tokenizer_skill = AutoTokenizer.from_pretrained("iqbalrahmananda/my-indo-bert-skill")
+ner_skill = pipeline("ner", model=model_skill, tokenizer=tokenizer_skill, aggregation_strategy="simple")
+
+print("Memuat model IndoBERT khusus jurusan IT...")
+model_major = AutoModelForTokenClassification.from_pretrained("iqbalrahmananda/bert-jurusan-it")
+tokenizer_major = AutoTokenizer.from_pretrained("iqbalrahmananda/bert-jurusan-it")
+ner_major = pipeline("ner", model=model_major, tokenizer=tokenizer_major, aggregation_strategy="simple")
+
+jurusan_keywords = [
+    "informatika","teknik informatika","ilmu komputer","computer science",
+    "sistem informasi","information systems","information system",
+    "teknologi informasi","information technology","it",
+    "rekayasa perangkat lunak","software engineering",
+    "data science","data analytics","data engineering","data analyst",
+    "artificial intelligence","ai","machine learning","deep learning",
+    "cyber security","keamanan siber","jaringan komputer","computer network",
+    "cloud computing","komputasi awan","big data","internet of things","iot",
+    "robotika","robotics","teknik komputer","computer engineering",
+    "sistem komputer","system computer","teknologi digital","digital business",
+    "bisnis digital","information management","manajemen informasi",
+    "information management system","teknologi informasi dan komunikasi","ict",
+    "information and communication technology","bioinformatics","bioinformatika",
+    "computational science","komputasi ilmiah","geoinformatics","geoinformatika",
+    "information security","security engineering","multimedia","animasi",
+    "game development","pengembangan game","teknologi game","computer vision",
+    "augmented reality","virtual reality","mixed reality","extended reality","xr",
+    "software technology","teknologi perangkat lunak","teknologi informasi bisnis",
+    "information technology management","smart system","sistem cerdas",
+    "knowledge engineering","human computer interaction","interaksi manusia komputer","hci"
+]
+
+# ==============================================
+# FUNGSI PEMBANTU
+# ==============================================
 def extract_text_pymupdf(pdf_path):
     doc = fitz.open(pdf_path)
-    text = "\n".join(page.get_text("text") for page in doc)
+    text = ""
+    for page in doc:
+        text += page.get_text("text") + "\n"
     return text
+
+def safe_ner_call(pipeline_func, text, tokenizer, max_tokens=512):
+    tokens = tokenizer.tokenize(text)
+    step = max_tokens - 10
+    results = []
+    for i in range(0, len(tokens), step):
+        chunk = tokenizer.convert_tokens_to_string(tokens[i:i+step])
+        results.extend(pipeline_func(chunk))
+    return results
 
 def split_sections(text):
     sections = {}
@@ -40,27 +99,16 @@ def split_sections(text):
 def normalize_skill(s):
     s = s.lower().strip()
     mapping = {
-        "pyth": "python", "phyton": "python", "ms excel": "excel",
-        "microsoft excel": "excel", "msexcel": "excel", "msoffice": "word",
-        "ms word": "word", "power point": "powerpoint", "power-point": "powerpoint",
-        "ppt": "powerpoint", "html5": "html", "htm": "html",
-        "coordination": "koordinasi", "communication": "komunikasi",
-        "adaptif": "adaptive", "selfmanagement": "self management",
-        "self-manage": "self management"
+        "pyth": "python", "phyton": "python", "ms excel": "excel", "microsoft excel": "excel",
+        "msexcel": "excel", "msoffice": "word", "ms word": "word", "power point": "powerpoint",
+        "power-point": "powerpoint", "ppt": "powerpoint", "html5": "html", "htm": "html",
+        "coordination": "koordinasi", "communication": "komunikasi", "adaptif": "adaptive",
+        "selfmanagement": "self management", "self-manage": "self management"
     }
     for key, val in mapping.items():
         if s == key or s.startswith(key):
             return val
     return s
-
-def safe_ner_call(pipeline_func, text, tokenizer, max_tokens=512):
-    tokens = tokenizer.tokenize(text)
-    step = max_tokens - 10
-    results = []
-    for i in range(0, len(tokens), step):
-        chunk = tokenizer.convert_tokens_to_string(tokens[i:i+step])
-        results.extend(pipeline_func(chunk))
-    return results
 
 def find_universities(text):
     patterns = [
@@ -71,98 +119,138 @@ def find_universities(text):
         r"(Politeknik\s+[A-Za-z0-9\.\-&' ]{2,60})",
         r"(College\s+[A-Za-z0-9\.\-&' ]{2,60})"
     ]
-    found, seen, result = [], {}, []
+
+    found = []
     for pat in patterns:
         for m in re.finditer(pat, text, flags=re.I):
-            name = re.sub(r"\s{2,}", " ", m.group(1).strip())
-            if name.lower() not in seen:
-                seen[name.lower()] = True
-                result.append(name)
+            name = m.group(1).strip()
+            name = re.sub(r"\s{2,}", " ", name)
+            found.append((name, m.start(), m.end()))
+
+    seen, result = {}, []
+    for u, s, e in found:
+        key = u.lower()
+        if key not in seen:
+            seen[key] = (u, s, e)
+            result.append((u, s, e))
     return result
 
 def extract_skills(full_text, skill_section_text, ner_pipeline, tokenizer):
     text_for_ner = skill_section_text if len(skill_section_text.strip()) > 5 else full_text
     ents_skill = safe_ner_call(ner_pipeline, text_for_ner, tokenizer)
-    detected = [normalize_skill(ent["word"]) for ent in ents_skill if ent.get("entity_group","").upper()=="SKILL"]
+
+    detected = []
+    for ent in ents_skill:
+        if ent.get("entity_group", "").upper() == "SKILL":
+            w = ent["word"].replace("##", "").strip()
+            w = re.sub(r"[^a-zA-Z0-9+\-# ]+", "", w)
+            if len(w) > 1:
+                w = normalize_skill(w)
+                detected.append(w.lower())
+
+    merged = []
+    skip_next = False
+    for i in range(len(detected)):
+        if skip_next:
+            skip_next = False
+            continue
+        if i + 1 < len(detected):
+            two = detected[i] + detected[i + 1]
+            if two in ["figma", "tableau", "vuejs", "reactjs"]:
+                merged.append(two)
+                skip_next = True
+                continue
+        merged.append(detected[i])
+    detected = merged
+
+    custom_map = {"table": "tableau", "fig": "figma", "au": "figma", "gma": "figma"}
+    detected = [custom_map.get(s, s) for s in detected]
     detected = sorted(set(detected))
     if detected:
         return detected
+
     fallback_keywords = [
-        "python","java","sql","excel","word","powerpoint","html","css","javascript",
-        "react","tableau","canva","git","linux","docker","pandas","numpy","tensorflow",
-        "keras","scikit","power bi"
+        "python","java","sql","excel","word","powerpoint","html","css","javascript","react",
+        "tableau","canva","git","linux","docker","pandas","numpy","tensorflow","keras",
+        "scikit","power bi","figma"
     ]
     text_low = full_text.lower()
     fallback_found = [kw for kw in fallback_keywords if re.search(rf"\b{re.escape(kw)}\b", text_low)]
     return sorted(set(normalize_skill(s) for s in fallback_found))
 
 # ==============================================
-# PARSER CV
+# PARSING CV
 # ==============================================
-def parse_cv(pdf_path, ner_major, tokenizer_major, ner_skill, tokenizer_skill, jurusan_keywords):
+def parse_cv(pdf_path):
     text = extract_text_pymupdf(pdf_path)
     sections = split_sections(text)
     education_section = sections.get("education", "")
     skill_section = sections.get("skills", "")
     experience_section = sections.get("experience", "")
 
-    # Jurusan
     ents_major = safe_ner_call(ner_major, education_section or text, tokenizer_major)
     jurusan_candidates = [ent["word"].strip() for ent in ents_major if "LABEL_1" in ent["entity_group"]]
     jurusan = None
     if jurusan_candidates:
-        jurusan = max(jurusan_candidates, key=len).title()
+        cleaned = [re.sub(r"(?i).*(majoring in|majors in|major in)\s*", "", j).strip() for j in jurusan_candidates]
+        jurusan = max(cleaned, key=len).title()
     else:
         for key in jurusan_keywords:
             if key in text.lower():
                 jurusan = key.title()
                 break
-    jurusan = jurusan or "Tidak Terdeteksi"
+    if not jurusan:
+        jurusan = "Tidak Terdeteksi"
 
-    # Universitas
     unis = find_universities(education_section or text)
-    chosen_uni = unis[-1] if unis else "-"
-    pendidikan_final = f"{chosen_uni} - {jurusan}" if chosen_uni != "-" else jurusan
+    chosen_uni = "-"
+    if unis:
+        if jurusan != "Tidak Terdeteksi":
+            pos = text.lower().find(jurusan.lower())
+            best, best_dist = None, None
+            for u_name, u_start, u_end in unis:
+                dist = abs(u_start - pos) if pos != -1 else 0
+                if best is None or dist < best_dist:
+                    best, best_dist = u_name, dist
+            chosen_uni = best
+        else:
+            chosen_uni = unis[-1][0]
+    chosen_uni = re.sub(r"\s+", " ", chosen_uni).strip().title() if chosen_uni else "-"
 
-    # Skills
+    pendidikan_parts = []
+    if chosen_uni and chosen_uni != "-":
+        pendidikan_parts.append(chosen_uni)
+    if jurusan and jururan.lower() not in (chosen_uni or "").lower():
+        pendidikan_parts.append(jurusan)
+    pendidikan_final = " - ".join(pendidikan_parts) if pendidikan_parts else "-"
+
     skills_list = extract_skills(text, skill_section, ner_skill, tokenizer_skill)
 
-    # Pengalaman
-    pengalaman = [s.strip() for s in re.split(r"[.\n]", experience_section or text)
-                  if any(x in s.lower() for x in ["intern","magang","staf","staff","project","experience"]) and len(s.strip()) > 5]
-    pengalaman = list(dict.fromkeys(pengalaman)) or ["Tidak Terdeteksi"]
+    pengalaman = []
+    source_text = experience_section if len(experience_section.strip()) > 10 else text
+    for sent in re.split(r"[.\n]", source_text):
+        if any(x in sent.lower() for x in ["intern", "magang", "staf", "staff", "project", "experience"]):
+            pengalaman.append(sent.strip())
+    pengalaman = [p for p in pengalaman if len(p) > 5]
+    pengalaman = list(dict.fromkeys(pengalaman))
 
     return {
         "pendidikan_terakhir": pendidikan_final,
         "skills": skills_list,
-        "pengalaman": pengalaman
+        "pengalaman": pengalaman if pengalaman else ["Tidak Terdeteksi"]
     }
 
 # ==============================================
-# MAIN PROGRAM
+# EKSEKUSI UTAMA
 # ==============================================
 if __name__ == "__main__":
-    job_file = get_drive_spreadsheet(JOBSTREET_DRIVE_LINK, "data_jobstreet.xlsx")
-    df_jobs = pd.read_excel(job_file)
-
-    print("Memuat model NER umum & khusus...")
-    model_skill = AutoModelForTokenClassification.from_pretrained("iqbalrahmananda/my-indo-bert-skill")
-    tokenizer_skill = AutoTokenizer.from_pretrained("iqbalrahmananda/my-indo-bert-skill")
-    ner_skill = pipeline("ner", model=model_skill, tokenizer=tokenizer_skill, aggregation_strategy="simple")
-
-    model_major = AutoModelForTokenClassification.from_pretrained("iqbalrahmananda/bert-jurusan-it")
-    tokenizer_major = AutoTokenizer.from_pretrained("iqbalrahmananda/bert-jurusan-it")
-    ner_major = pipeline("ner", model=model_major, tokenizer=tokenizer_major, aggregation_strategy="simple")
-
-    jurusan_keywords = ["informatika","teknik informatika","sistem informasi","data science","ai","machine learning"]
-
     pdf_path = input("Masukkan path file CV (PDF): ").strip()
     if not os.path.exists(pdf_path):
-        raise FileNotFoundError(f"File {pdf_path} tidak ditemukan.")
+        print("❌ File tidak ditemukan.")
+        exit()
 
-    lokasi = input("Masukkan lokasi: ").strip()
-    cv_data = parse_cv(pdf_path, ner_major, tokenizer_major, ner_skill, tokenizer_skill, jurusan_keywords)
-    cv_data["lokasi"] = lokasi
+    cv_data = parse_cv(pdf_path)
+    cv_data["lokasi"] = input("Masukkan Lokasi: ")
 
     cv_text = " ".join([
         cv_data.get("pendidikan_terakhir", ""),
@@ -172,7 +260,9 @@ if __name__ == "__main__":
     ])
 
     df_jobs["job_text"] = df_jobs.apply(
-        lambda r: f"{r.get('title','')} {r.get('job_field','')} {r.get('requirement','')} {r.get('kategori','')} {r.get('level','')} {r.get('location','')}",
+        lambda row: f"{row.get('title', '')} {row.get('job_field', '')} "
+                    f"{row.get('requirement', '')} {row.get('kategori', '')} "
+                    f"{row.get('level', '')} {row.get('location', '')}",
         axis=1
     )
 
@@ -183,10 +273,19 @@ if __name__ == "__main__":
     df_jobs["Similarity_Score"] = similarities.cpu().numpy()
     df_jobs_sorted = df_jobs.sort_values(by="Similarity_Score", ascending=False)
 
+    print("\n📄 OUTPUT JSON:")
     print(json.dumps(cv_data, indent=2, ensure_ascii=False))
-    print("\n=== Hasil Kecocokan CV vs Job ===\n")
-    for _, row in df_jobs_sorted.head(5).iterrows():
-        print(f"{row['title']} | {row['company']} | {row['location']} | Skor: {row['Similarity_Score']*100:.2f}%")
 
-    df_jobs_sorted.to_excel(OUTPUT_EXCEL, index=False)
-    print(f"\n✅ Hasil disimpan ke {OUTPUT_EXCEL}")
+    print("\n=== HASIL KEC0C0KAN CV vs JOB ===\n")
+    for idx, row in df_jobs_sorted.head(5).iterrows():
+        print(f"Posisi: {row['title']}")
+        print(f"Perusahaan: {row['company']}")
+        print(f"Lokasi: {row['location']}")
+        print(f"Bidang: {row['job_field']}")
+        print(f"Kecocokan: {row['Similarity_Score']*100:.2f}%")
+        print(f"Link: {row['link']}")
+        print("-" * 80)
+
+    output_name = "Hasil_Kecocokan_Semantik_CV_vs_Job.xlsx"
+    df_jobs_sorted.to_excel(output_name, index=False)
+    print(f"\n✅ Hasil disimpan sebagai: {output_name}")
