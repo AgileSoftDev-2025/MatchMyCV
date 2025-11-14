@@ -12,71 +12,110 @@
     background-position: right 1rem center;
     background-size: 1.25rem;
   }
+
+  /* Loading animation */
+  @keyframes progressBar {
+    0% { width: 0%; }
+    100% { width: 100%; }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- Main Content -->
-<section class="min-h-[calc(100vh-8.375rem)] py-[3.75rem] px-[5%] flex items-center justify-center">
-  <div class="max-w-[56.25rem] w-full">
-    <!-- Header -->
-    <div class="text-center mb-12">
-      <h1 class="text-blue-600 font-bold text-[2.625rem] leading-tight mb-3">Match Your CV</h1>
-      <p class="text-slate-800 text-lg leading-relaxed">Find the best job matches for your CV instantly.</p>
-    </div>
+<!-- Header Section (Hidden when loading) -->
+<section id="page-header" class="pt-20 pb-10">
+  <div class="text-center px-4">
+    <h1 class="text-3xl md:text-4xl font-extrabold text-[#2D63B0] mb-2">
+      Match Your CV
+    </h1>
+    <p class="text-slate-600 text-lg">
+      Find the best job matches for your CV instantly.
+    </p>
+  </div>
+</section>
 
-    <!-- Form -->
-    <div class="mb-8">
-      <label for="location" class="block text-slate-900 font-semibold text-[1.0625rem] mb-3">Location</label>
-      <select id="location" class="form-select selected w-full py-3.5 px-4 border-2 border-[#bcbcbd] rounded-[0.625rem] text-[0.9375rem] text-slate-900 bg-white pr-10 cursor-pointer appearance-none focus:outline-none focus:border-blue-600 transition-colors">
-        <option value="all">All Locations</option>
-        <option value="jakarta">Jakarta</option>
-        <option value="surabaya">Surabaya</option>
-        <option value="bandung">Bandung</option>
-        <option value="medan">Medan</option>
-        <option value="semarang">Semarang</option>
-        <option value="makassar">Makassar</option>
-        <option value="yogyakarta">Yogyakarta</option>
-        <option value="bali">Bali</option>
-      </select>
-    </div>
+<section class="pb-16">
+  <div class="max-w-[56.25rem] mx-auto px-6">
+    
+    <!-- Form Container (Initial State) -->
+    <div id="form-container">
+      <!-- Form -->
+      <div class="mb-8">
+        <label for="location" class="block text-slate-900 font-semibold text-[1.0625rem] mb-3">Location</label>
+        <select id="location" class="form-select selected w-full py-3.5 px-4 border-2 border-[#bcbcbd] rounded-[0.625rem] text-[0.9375rem] text-slate-900 bg-white pr-10 cursor-pointer appearance-none focus:outline-none focus:border-blue-600 transition-colors">
+          <option value="all">All Locations</option>
+          <option value="jakarta">Jakarta</option>
+          <option value="surabaya">Surabaya</option>
+          <option value="bandung">Bandung</option>
+          <option value="medan">Medan</option>
+          <option value="semarang">Semarang</option>
+          <option value="makassar">Makassar</option>
+          <option value="yogyakarta">Yogyakarta</option>
+          <option value="bali">Bali</option>
+        </select>
+      </div>
 
-    <!-- Upload Section -->
-    <div class="flex flex-col items-center">
-      <input type="file" id="cv-upload" accept=".pdf" class="hidden">
-      <button type="button" id="upload-btn" onclick="document.getElementById('cv-upload').click()" class="bg-blue-600 text-white py-[0.9375rem] px-[3.4375rem] rounded-[0.625rem] font-semibold text-xl border-0 cursor-pointer mb-3 hover:bg-blue-700 transition-colors">
-        Upload CV
-      </button>
-    </div>
-
-    <!-- File Card -->
-    <div id="file-card" class="hidden w-full items-center justify-center mb-3">
-      <div class="bg-white border-2 border-slate-200 rounded-xl p-4 px-5 flex items-center gap-3.5 max-w-[25rem] w-[70%] shadow-sm">
-        <div class="bg-[#525151] rounded-lg p-2.5 flex-shrink-0">
-          <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"/>
-          </svg>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div id="display-filename" class="text-slate-900 font-semibold text-sm whitespace-nowrap overflow-hidden text-ellipsis mb-0.5">My CV.pdf</div>
-          <div id="display-filesize" class="text-slate-500 text-xs">3.5 MB</div>
-        </div>
-        <button type="button" onclick="removeFile()" class="bg-slate-600 rounded-full w-7 h-7 flex items-center justify-center cursor-pointer flex-shrink-0 hover:bg-slate-700 transition-colors">
-          <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
+      <!-- Upload Section -->
+      <div class="flex flex-col items-center">
+        <input type="file" id="cv-upload" accept=".pdf" class="hidden">
+        <button type="button" id="upload-btn" onclick="document.getElementById('cv-upload').click()" class="bg-blue-600 text-white py-[0.9375rem] px-[3.4375rem] rounded-[0.625rem] font-semibold text-xl border-0 cursor-pointer mb-3 hover:bg-blue-700 transition-colors">
+          Upload CV
         </button>
+      </div>
+
+      <!-- File Card -->
+      <div id="file-card" class="hidden w-full items-center justify-center mb-3">
+        <div class="bg-white border-2 border-slate-200 rounded-xl p-4 px-5 flex items-center gap-3.5 max-w-[25rem] w-[70%] shadow-sm">
+          <div class="bg-[#525151] rounded-lg p-2.5 flex-shrink-0">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"/>
+            </svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div id="display-filename" class="text-slate-900 font-semibold text-sm whitespace-nowrap overflow-hidden text-ellipsis mb-0.5">My CV.pdf</div>
+            <div id="display-filesize" class="text-slate-500 text-xs">3.5 MB</div>
+          </div>
+          <button type="button" onclick="removeFile()" class="bg-slate-600 rounded-full w-7 h-7 flex items-center justify-center cursor-pointer flex-shrink-0 hover:bg-slate-700 transition-colors">
+            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Analyze Section -->
+      <div class="flex flex-col items-center">
+        <button type="button" id="analyze-btn" class="hidden bg-blue-600 text-white py-[0.9375rem] px-[3.4375rem] rounded-[0.625rem] font-semibold text-xl border-0 cursor-pointer mb-3 hover:bg-blue-700 transition-colors">
+          Analyze
+        </button>
+        <p class="text-slate-500 text-sm">Supported format: PDF (max. 10 MB)</p>
       </div>
     </div>
 
-    <!-- Analyze Section -->
-    <div class="flex flex-col items-center">
-      <button type="button" id="analyze-btn" class="hidden bg-blue-600 text-white py-[0.9375rem] px-[3.4375rem] rounded-[0.625rem] font-semibold text-xl border-0 cursor-pointer mb-3 hover:bg-blue-700 transition-colors">
-        Analyze
-      </button>
-      <p class="text-slate-500 text-sm">Supported format: PDF (max. 10 MB)</p>
+    <!-- Loading Container (Hidden by default) -->
+    <div id="loading-container" class="hidden pt-20">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-[#2D63B0] mb-3">
+          Analyzing CV
+        </h1>
+        <p class="text-slate-600 text-base" id="loading-filename">My CV.pdf (3.5 MB)</p>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="max-w-4xl mx-auto mb-8">
+        <div class="bg-slate-200 rounded-full h-8 overflow-hidden shadow-inner">
+          <div id="progress-bar" class="bg-blue-600 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Progress Text -->
+      <div class="text-center">
+        <p class="text-4xl md:text-5xl font-bold text-blue-600 mb-2" id="progress-percent">0%</p>
+        <p class="text-lg text-slate-600" id="progress-status">Analyzed</p>
+      </div>
     </div>
+
   </div>
 </section>
 
@@ -89,7 +128,14 @@
     uploadBtn: document.getElementById('upload-btn'),
     fileCard: document.getElementById('file-card'),
     analyzeBtn: document.getElementById('analyze-btn'),
-    locationSelect: document.getElementById('location')
+    locationSelect: document.getElementById('location'),
+    pageHeader: document.getElementById('page-header'),
+    formContainer: document.getElementById('form-container'),
+    loadingContainer: document.getElementById('loading-container'),
+    progressBar: document.getElementById('progress-bar'),
+    progressPercent: document.getElementById('progress-percent'),
+    progressStatus: document.getElementById('progress-status'),
+    loadingFilename: document.getElementById('loading-filename')
   };
   
   let uploadedFile = null;
@@ -109,6 +155,41 @@
     } else {
       els.analyzeBtn.classList.add('hidden');
     }
+  }
+
+  function startAnalysis() {
+    // Hide page header and form
+    els.pageHeader.classList.add('hidden');
+    els.formContainer.classList.add('hidden');
+    
+    // Show loading
+    els.loadingContainer.classList.remove('hidden');
+    
+    // Set filename in loading screen
+    const filesize = (uploadedFile.size / 1024 / 1024).toFixed(1);
+    els.loadingFilename.textContent = `${uploadedFile.name} (${filesize} MB)`;
+    
+    // Simulasi loading
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 15;
+      if (progress > 100) progress = 100;
+      
+      els.progressBar.style.width = `${progress}%`;
+      els.progressPercent.textContent = `${Math.floor(progress)}%`;
+      
+      if (progress >= 100) {
+        clearInterval(interval);
+        els.progressStatus.textContent = 'Analysis Complete!';
+        
+        // Redirect to results after 1 second
+        setTimeout(() => {
+          console.log('Redirecting to results...');
+          window.location.href = '/hasil_rekomendasi.html';
+          alert('Analysis complete! Redirecting to results...');
+        }, 1000);
+      }
+    }, 200);
   }
 
   els.fileInput.addEventListener('change', function(e) {
@@ -140,7 +221,7 @@
 
   els.analyzeBtn.addEventListener('click', function() {
     console.log('Analyzing CV:', uploadedFile.name, 'Location:', els.locationSelect.value);
-    alert('Analyzing your CV...');
+    startAnalysis();
   });
 </script>
 {% endblock %}
