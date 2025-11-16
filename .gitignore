@@ -41,3 +41,6 @@ htmlcov/
 
 # VSCode workspace cache
 .history/
+
+matchmycv_website/data/
+matchmycv_website/media/
