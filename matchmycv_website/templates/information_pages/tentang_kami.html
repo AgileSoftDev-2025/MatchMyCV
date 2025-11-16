@@ -1,8 +1,111 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Beranda | MatchMyCV{% endblock %}
+
+{% block title %}About Us · MatchMyCV{% endblock %}
+
+{% block extra_head %}
+<style>
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0px); }
+  }
+  .animate-float { animation: float 6s ease-in-out infinite; }
+</style>
+{% endblock %}
+
 {% block content %}
-  <div class="p-5 bg-light rounded-3">
-    <h1 class="fw-bold">Tentang Kami</h1>
+
+<section class="pt-20 pb-10">
+  <div class="text-center px-4">
+    <h1 class="text-3xl md:text-4xl font-extrabold text-[#2D63B0] mb-2">
+      Get to know more about us
+    </h1>
+    <p class="text-slate-600 text-lg">
+      MatchMyCV – We match your skills with the jobs that matter.
+    </p>
   </div>
+</section>
+
+<section class="pb-10">
+  <div class="max-w-6xl mx-auto px-6">
+      <!-- TAB HEADER IMAGE -->
+    <div class="w-full">
+      <img 
+        src="{% static 'images/Tab Folder.png' %}" 
+        alt="Tab Header"
+        class="w-full h-auto rounded-t-xl"
+      >
+    </div>
+
+    <div class="bg-white rounded-b-xl shadow-md overflow-hidden">
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 p-10">
+
+        <!-- Kiri -->
+        <div class="flex flex-col items-center">
+          <img 
+            src="{% static 'images/Logo MatchMyCV 2.png' %}" 
+            alt="MatchMyCV Logo"
+            class="w-64 md:w-72 h-auto object-contain"
+          >
+          <div class="mt-10 bg-[#F1F7FE] rounded-xl shadow-md p-6 w-full">
+            <h2 class="font-semibold text-slate-700 mb-4">Contact Us:</h2>
+            <div class="flex items-center gap-3 mb-3">
+              <img src="{% static 'images/Gmail.png' %}" class="w-6 h-6">
+              <span class="text-slate-600">hello@matchmycv.id</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <img src="{% static 'images/Whatsapp.png' %}" class="w-6 h-6">
+              <span class="text-slate-600">+62 812-3456-7890</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kanan -->
+        <div class="lg:col-span-2">
+          <h2 class="text-xl font-bold mb-4 text-slate-800">
+            About Us – <span class="text-[#2563eb]">MatchMyCV</span>
+          </h2>
+
+          <p class="text-slate-600 leading-relaxed mb-4">
+            At <strong>MatchMyCV</strong>, we believe that finding the right job should be simple, fast,
+            and accurate. In today's digital era, job seekers are faced with thousands of
+            listings across multiple platforms, making the search process overwhelming and
+            often frustrating. Many end up applying for positions that don’t align with their
+            skills, experience, or goals.
+          </p>
+
+          <p class="text-slate-600 leading-relaxed mb-4">
+            That’s why we created <strong>MatchMyCV</strong> — a smart platform that analyzes your
+            CV and connects you with job opportunities that truly match your profile.
+            By combining advanced machine learning with an intuitive interface, we aim to
+            make the job search process more efficient and tailored to every individual.
+          </p>
+
+          <p class="text-slate-600 leading-relaxed mb-4">
+            Our mission is to empower job seekers by:
+          </p>
+
+          <ul class="list-disc pl-5 text-slate-600 leading-relaxed mb-4">
+            <li><strong>Simplifying</strong> the job search process</li>
+            <li><strong>Personalizing</strong> recommendations based on skills, experience, and location</li>
+            <li><strong>Maximizing</strong> the chances of finding the right career opportunities</li>
+          </ul>
+
+          <p class="text-slate-600 leading-relaxed">
+            With MatchMyCV, we strive to ensure that every job seeker can discover
+            opportunities that match not only their qualifications but also their aspirations.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pb-16 pt-10 text-center text-slate-500">
+  <p>Questions or need help?<br>Contact us using the channels above.</p>
+</section>
+
 {% endblock %}
