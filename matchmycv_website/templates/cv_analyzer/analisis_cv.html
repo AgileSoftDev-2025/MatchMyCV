@@ -157,7 +157,7 @@
     }
   }
 
-  function startAnalysis() {
+  async function startAnalysis() {
     // Hide page header and form
     els.pageHeader.classList.add('hidden');
     els.formContainer.classList.add('hidden');
@@ -169,27 +169,54 @@
     const filesize = (uploadedFile.size / 1024 / 1024).toFixed(1);
     els.loadingFilename.textContent = `${uploadedFile.name} (${filesize} MB)`;
     
-    // Simulasi loading
+    // Start progress animation
     let progress = 0;
     const interval = setInterval(() => {
-      progress += Math.random() * 15;
-      if (progress > 100) progress = 100;
+      progress += Math.random() * 10;
+      if (progress > 90) progress = 90;
       
       els.progressBar.style.width = `${progress}%`;
       els.progressPercent.textContent = `${Math.floor(progress)}%`;
+    }, 300);
+    
+    // Send file to backend
+    const formData = new FormData();
+    formData.append('cv_file', uploadedFile);
+    formData.append('location', els.locationSelect.value);
+    
+    try {
+      const response = await fetch('/api/analyze-cv/', {
+        method: 'POST',
+        body: formData
+      });
       
-      if (progress >= 100) {
-        clearInterval(interval);
+      const result = await response.json();
+      
+      clearInterval(interval);
+      
+      if (result.success) {
+        els.progressBar.style.width = '100%';
+        els.progressPercent.textContent = '100%';
         els.progressStatus.textContent = 'Analysis Complete!';
         
-        // Redirect to results after 1 second
+        sessionStorage.setItem('cv_analysis_results', JSON.stringify(result));
+        
         setTimeout(() => {
-          console.log('Redirecting to results...');
-          window.location.href = '/hasil_rekomendasi.html';
-          alert('Analysis complete! Redirecting to results...');
+          window.location.href = '/hasil-rekomendasi/';
         }, 1000);
+      } else {
+        alert('Error: ' + (result.error || 'Analysis failed'));
+        els.pageHeader.classList.remove('hidden');
+        els.formContainer.classList.remove('hidden');
+        els.loadingContainer.classList.add('hidden');
       }
-    }, 200);
+    } catch (error) {
+      clearInterval(interval);
+      alert('Error: ' + error.message);
+      els.pageHeader.classList.remove('hidden');
+      els.formContainer.classList.remove('hidden');
+      els.loadingContainer.classList.add('hidden');
+    }
   }
 
   els.fileInput.addEventListener('change', function(e) {
