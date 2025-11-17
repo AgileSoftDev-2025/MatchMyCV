@@ -195,5 +195,69 @@
   <footer class="border-t border-slate-100 p-6 text-center text-sm text-slate-500">
     © MatchMyCV 2025. All Rights Reserved.
   </footer>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const resultsData = sessionStorage.getItem('cv_analysis_results');
+    
+    if (!resultsData) {
+      alert('No analysis results found. Please upload a CV first.');
+      window.location.href = '/analisis-cv/';
+      return;
+    }
+    
+    const results = JSON.parse(resultsData);
+    const cvData = results.cv_data;
+    const jobs = results.job_recommendations;
+    
+    // Update Skills
+    const skillsList = document.querySelector('.rounded-2xl ul');
+    if (skillsList && cvData.skills && cvData.skills.length > 0) {
+      skillsList.innerHTML = cvData.skills.map(skill => 
+        `<li class="mb-1.5">${skill.charAt(0).toUpperCase() + skill.slice(1)}</li>`
+      ).join('');
+    }
+    
+    // Update Experience
+    const experienceCard = document.querySelectorAll('.rounded-2xl')[1];
+    if (experienceCard && cvData.pengalaman && cvData.pengalaman.length > 0) {
+      const expContainer = experienceCard.querySelector('p');
+      if (expContainer) {
+        expContainer.innerHTML = cvData.pengalaman.slice(0, 3).join('<br><br>');
+      }
+    }
+    
+    // Update Education
+    const educationCard = document.querySelectorAll('.rounded-2xl')[2];
+    if (educationCard && cvData.pendidikan_terakhir) {
+      const eduContainer = educationCard.querySelector('p');
+      if (eduContainer) {
+        eduContainer.textContent = cvData.pendidikan_terakhir;
+      }
+    }
+    
+    // Update Job Cards
+    const jobContainer = document.querySelector('.grid');
+    if (jobContainer && jobs && jobs.length > 0) {
+      jobContainer.innerHTML = jobs.map((job, index) => `
+        <div class="flex flex-col overflow-hidden rounded-xl border border-slate-900/[.06] bg-white shadow-[0_4px_12px_rgba(2,6,23,0.08)] transition-shadow transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)]">
+          <div class="relative h-[180px] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-${1486406146926 + index}-c627a92ad1ab?w=400&h=300&fit=crop" alt="office" class="block h-full w-full object-cover">
+            <div class="absolute top-3 right-3 rounded-full bg-green-500 py-1.5 px-3.5 text-xs font-semibold text-white shadow-[0_2px_8px_rgba(34,197,94,0.3)]">Match: ${Math.round(job.similarity_score)}%</div>
+          </div>
+          <div class="flex flex-1 flex-col p-5">
+            <div class="mb-1.5 text-lg font-semibold text-slate-900">${job.title}</div>
+            <div class="mb-3 text-sm text-slate-500">${job.company}</div>
+            <div class="mb-4 flex flex-col gap-1.5 text-sm text-slate-600">
+              <div class="flex items-center gap-1.5">📍 ${job.location}</div>
+              <div class="flex items-center gap-1.5">💼 ${job.level || 'Full-time'}</div>
+              <div class="flex items-center gap-1.5 font-semibold text-green-600">🏢 ${job.job_field}</div>
+            </div>
+            <a class="mt-auto block rounded-lg bg-blue-600 p-3 text-center text-sm font-semibold text-white transition-colors duration-200 hover:bg-blue-700" href="${job.link}" target="_blank">SEE MORE</a>
+          </div>
+        </div>
+      `).join('');
+    }
+  });
+</script>
 </body>
 </html>
