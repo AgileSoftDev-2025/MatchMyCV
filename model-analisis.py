@@ -3,14 +3,11 @@ import json
 import re
 import pandas as pd
 import gdown
+from google.colab import files
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
 from sentence_transformers import SentenceTransformer, util
 import torch
-import os
 
-# ==============================================
-# KONFIGURASI FILE DAN DATASET
-# ==============================================
 JOBSTREET_DRIVE_LINK = "https://docs.google.com/spreadsheets/d/1SasbACsxdJvFtZFxQFwQXZC05nQY3yX1/edit?gid=2108825113"
 
 def get_drive_spreadsheet(drive_link, output_name):
@@ -22,9 +19,6 @@ def get_drive_spreadsheet(drive_link, output_name):
 job_file = get_drive_spreadsheet(JOBSTREET_DRIVE_LINK, "data_jobstreet.xlsx")
 df_jobs = pd.read_excel(job_file)
 
-# ==============================================
-# LOAD MODEL
-# ==============================================
 print("Memuat model umum...")
 model_general = AutoModelForTokenClassification.from_pretrained("cahya/bert-base-indonesian-NER")
 tokenizer_general = AutoTokenizer.from_pretrained("cahya/bert-base-indonesian-NER")
@@ -63,9 +57,6 @@ jurusan_keywords = [
     "knowledge engineering","human computer interaction","interaksi manusia komputer","hci"
 ]
 
-# ==============================================
-# FUNGSI PEMBANTU
-# ==============================================
 def extract_text_pymupdf(pdf_path):
     doc = fitz.open(pdf_path)
     text = ""
@@ -163,8 +154,14 @@ def extract_skills(full_text, skill_section_text, ner_pipeline, tokenizer):
         merged.append(detected[i])
     detected = merged
 
-    custom_map = {"table": "tableau", "fig": "figma", "au": "figma", "gma": "figma"}
+    custom_map = {
+        "table": "tableau",
+        "fig": "figma",
+        "au": "figma",
+        "gma": "figma"
+    }
     detected = [custom_map.get(s, s) for s in detected]
+
     detected = sorted(set(detected))
     if detected:
         return detected
@@ -178,9 +175,6 @@ def extract_skills(full_text, skill_section_text, ner_pipeline, tokenizer):
     fallback_found = [kw for kw in fallback_keywords if re.search(rf"\b{re.escape(kw)}\b", text_low)]
     return sorted(set(normalize_skill(s) for s in fallback_found))
 
-# ==============================================
-# PARSING CV
-# ==============================================
 def parse_cv(pdf_path):
     text = extract_text_pymupdf(pdf_path)
     sections = split_sections(text)
@@ -220,7 +214,7 @@ def parse_cv(pdf_path):
     pendidikan_parts = []
     if chosen_uni and chosen_uni != "-":
         pendidikan_parts.append(chosen_uni)
-    if jurusan and jururan.lower() not in (chosen_uni or "").lower():
+    if jurusan and jurusan != "Tidak Terdeteksi" and jurusan.lower() not in (chosen_uni or "").lower():
         pendidikan_parts.append(jurusan)
     pendidikan_final = " - ".join(pendidikan_parts) if pendidikan_parts else "-"
 
@@ -237,55 +231,82 @@ def parse_cv(pdf_path):
     return {
         "pendidikan_terakhir": pendidikan_final,
         "skills": skills_list,
-        "pengalaman": pengalaman if pengalaman else ["Tidak Terdeteksi"]
+        "pengalaman": pengalaman if pengalaman else ["Tidak Terdeteksi"],
+        "lokasi": ""
     }
 
-# ==============================================
-# EKSEKUSI UTAMA
-# ==============================================
-if __name__ == "__main__":
-    pdf_path = input("Masukkan path file CV (PDF): ").strip()
-    if not os.path.exists(pdf_path):
-        print("❌ File tidak ditemukan.")
-        exit()
-
-    cv_data = parse_cv(pdf_path)
-    cv_data["lokasi"] = input("Masukkan Lokasi: ")
-
-    cv_text = " ".join([
-        cv_data.get("pendidikan_terakhir", ""),
-        " ".join(cv_data.get("skills", [])),
-        " ".join(cv_data.get("pengalaman", [])),
-        cv_data.get("lokasi", "")
+def calculate_weighted_similarity(cv_data, df_jobs, model_embed):
+    """
+    Menghitung similarity dengan bobot:
+    - Pengalaman: 40%
+    - Skills: 40% 
+    - Lokasi: 20%
+    """
+    cv_text_weighted = " ".join([
+        " ".join(cv_data.get("pengalaman", [])) * 2,  # 40%
+        " ".join(cv_data.get("skills", [])) * 2,      # 40%
+        cv_data.get("lokasi", "") * 1                 # 20%
     ])
-
-    df_jobs["job_text"] = df_jobs.apply(
-        lambda row: f"{row.get('title', '')} {row.get('job_field', '')} "
-                    f"{row.get('requirement', '')} {row.get('kategori', '')} "
-                    f"{row.get('level', '')} {row.get('location', '')}",
+    
+    df_jobs["job_text_weighted"] = df_jobs.apply(
+        lambda row: " ".join([
+            f"{row.get('requirement', '')} {row.get('level', '')}" * 2,  # 40%
+            f"{row.get('title', '')} {row.get('job_field', '')} {row.get('kategori', '')}" * 2,  # 40%
+            str(row.get('location', '')) * 1  # 20%
+        ]),
         axis=1
     )
-
-    model_embed = SentenceTransformer("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
-    job_embeddings = model_embed.encode(df_jobs["job_text"].tolist(), convert_to_tensor=True, normalize_embeddings=True)
-    cv_embedding = model_embed.encode(cv_text, convert_to_tensor=True, normalize_embeddings=True)
+    
+    job_embeddings = model_embed.encode(
+        df_jobs["job_text_weighted"].tolist(), 
+        convert_to_tensor=True, 
+        normalize_embeddings=True
+    )
+    cv_embedding = model_embed.encode(
+        [cv_text_weighted], 
+        convert_to_tensor=True, 
+        normalize_embeddings=True
+    )
+    
     similarities = util.cos_sim(cv_embedding, job_embeddings)[0]
-    df_jobs["Similarity_Score"] = similarities.cpu().numpy()
-    df_jobs_sorted = df_jobs.sort_values(by="Similarity_Score", ascending=False)
+    return similarities
 
-    print("\n📄 OUTPUT JSON:")
-    print(json.dumps(cv_data, indent=2, ensure_ascii=False))
+print("Silakan upload file CV (PDF) kamu:")
+uploaded = files.upload()
+for filename in uploaded.keys():
+    cv_file = filename
 
-    print("\n=== HASIL KEC0C0KAN CV vs JOB ===\n")
-    for idx, row in df_jobs_sorted.head(5).iterrows():
-        print(f"Posisi: {row['title']}")
-        print(f"Perusahaan: {row['company']}")
-        print(f"Lokasi: {row['location']}")
-        print(f"Bidang: {row['job_field']}")
-        print(f"Kecocokan: {row['Similarity_Score']*100:.2f}%")
-        print(f"Link: {row['link']}")
-        print("-" * 80)
+cv_data = parse_cv(cv_file)
+cv_data["lokasi"] = input("Masukkan Lokasi: ")
 
-    output_name = "Hasil_Kecocokan_Semantik_CV_vs_Job.xlsx"
-    df_jobs_sorted.to_excel(output_name, index=False)
-    print(f"\n✅ Hasil disimpan sebagai: {output_name}")
+model_embed = SentenceTransformer("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+weighted_scores = calculate_weighted_similarity(cv_data, df_jobs, model_embed)
+df_jobs["Similarity_Score"] = weighted_scores.cpu().numpy()
+df_jobs_sorted = df_jobs.sort_values(by="Similarity_Score", ascending=False)
+
+print("\n OUTPUT JSON:")
+print(json.dumps(cv_data, indent=2, ensure_ascii=False))
+
+print(f"\n REKOMENDASI LOWONGAN DI {cv_data['lokasi'].upper()}:\n")
+
+lokasi_user = cv_data["lokasi"].lower()
+df_lokasi_cocok = df_jobs_sorted[
+    df_jobs_sorted["location"].str.lower().str.contains(lokasi_user, na=False)
+]
+
+if len(df_lokasi_cocok) > 0:
+    df_tampil = df_lokasi_cocok.head(5)
+else:
+    print(f"⚠️ Tidak ditemukan lowongan di {cv_data['lokasi']}, menampilkan semua lokasi:")
+    df_tampil = df_jobs_sorted.head(5)
+
+for idx, row in df_tampil.iterrows():
+    lokasi_match = "✅" if cv_data["lokasi"].lower() in str(row['location']).lower() else "❌"
+    
+    print(f"Posisi: {row['title']}")
+    print(f"Perusahaan: {row['company']}")
+    print(f"Lokasi: {row['location']} {lokasi_match}")
+    print(f"Bidang: {row['job_field']}")
+    print(f"Kecocokan: {row['Similarity_Score']*100:.2f}%")
+    print(f"Link: {row['link']}")
+    print("-" * 80)
