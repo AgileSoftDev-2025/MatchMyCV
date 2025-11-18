@@ -38,7 +38,7 @@ MatchMyCV adalah platform berbasis web yang membantu pengguna menganalisis Curri
 
 ## 🧱 Arsitektur Sistem (High Level)
 
-
+```mermaid
 flowchart TD
 A[User Upload CV] --> B[Django Backend]
 B --> C[NLP Parsing Module]
@@ -49,9 +49,10 @@ D --> G[Job Recommendation Engine]
 E --> G
 F --> G
 G --> H[Recommendation Output]
-🗂️ Struktur Project
-text
-Copy code
+```
+## 🗂️ Struktur Project
+```text
+
 matchmycv/
 └─ matchmycv_website/
    ├─ cv_analyzer/               # Modul analisis CV
@@ -67,7 +68,8 @@ matchmycv/
    ├─ package.json               # Build tools frontend
    ├─ manage.py
    └─ settings.py
-🏁 Instalasi & Setup Development
+```
+## 🏁 Instalasi & Setup Development
 1️⃣ Clone Repository
 bash
 Copy code
@@ -96,10 +98,11 @@ Copy code
 python manage.py runserver
 Akses website melalui:
 
-cpp
-Copy code
+
+```
 http://127.0.0.1:8000/
-📄 Halaman Utama Aplikasi
+```
+## 📄 Halaman Utama Aplikasi
 Halaman	URL
 Landing Page	/
 Tentang Kami	/tentang-kami/
@@ -109,7 +112,7 @@ Hasil Rekomendasi	/analisis-cv/hasil-rekomendasi/
 Login	/login/
 Register	/register/
 
-🧪 Status Pengembangan
+## 🧪 Status Pengembangan
 Status	Fase
 ✅ UI Template	Completed
 ✅ Authentication
@@ -118,7 +121,7 @@ Status	Fase
 🔜 Export PDF Result	Planned
 🔜 AI LLM Integration	Planned
 
-📌 Roadmap Sprint
+## 📌 Roadmap Sprint
 📍 Sprint 1 (Week 10–11)
 Setup Django project
 
@@ -138,12 +141,12 @@ Enhancement recommendation engine
 
 UAT & documentation
 
-🧭 Known Issues
+## 🧭 Known Issues
 ⚠ Tailwind CLI perlu environment Windows yang stabil
 ⚠ CV parsing masih dummy (prototype)
 ⚠ Hasil rekomendasi terbatas (early-stage model)
 
-👥 Tim Pengembang MatchMyCV
+## 👥 Tim Pengembang MatchMyCV
 NIM	Nama	Role
 187231010	Adelia	Project Manager
 187231011	Cokorda Istri Trisna Shanti Maharani Pemayun	Research & UI Writer
@@ -153,21 +156,21 @@ NIM	Nama	Role
 
 Tim berkolaborasi melalui GitHub, Figma, dan komunikasi rutin.
 
-🛠️ Tools Lingkungan Pengembangan
+## 🛠️ Tools Lingkungan Pengembangan
 Tools	Kegunaan
 VSCode	Code Editor
 GitHub	Version Control
 Figma	UI/UX Wireframing
 Postman	API Testing (fase lanjut)
 
-🔐 Security Notes
+## 🔐 Security Notes
 Tidak menyimpan data pengguna sensitif
 
 Tidak menyimpan berkas CV di server (development mode)
 
 Menggunakan hashing bawaan Django
 
-🧬 Enhancement di Masa Depan
+## 🧬 Enhancement di Masa Depan
 Dukungan format DOCX
 
 Scoring ATS berbasis AI
@@ -178,7 +181,7 @@ Export laporan rekomendasi PDF
 
 Grafik skill radar chart
 
-🤝 Kontribusi
+## 🤝 Kontribusi
 Pull Request dipersilakan:
 
 bash
