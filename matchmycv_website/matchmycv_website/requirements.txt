@@ -1,0 +1,8 @@
+PyMuPDF
+pandas
+gdown
+transformers
+torch
+sentence-transformers
+scikit-learn
+openpyxl
