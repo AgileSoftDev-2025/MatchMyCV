@@ -70,6 +70,7 @@ matchmycv/
    └─ settings.py
 ```
 ## 🏁 Instalasi & Setup Development
+
 1️⃣ Clone Repository
 bash
 Copy code
@@ -103,6 +104,7 @@ Akses website melalui:
 http://127.0.0.1:8000/
 ```
 ## 📄 Halaman Utama Aplikasi
+
 Halaman	URL
 Landing Page	/
 Tentang Kami	/tentang-kami/
@@ -113,6 +115,7 @@ Login	/login/
 Register	/register/
 
 ## 🧪 Status Pengembangan
+
 Status	Fase
 ✅ UI Template	Completed
 ✅ Authentication
@@ -122,6 +125,7 @@ Status	Fase
 🔜 AI LLM Integration	Planned
 
 ## 📌 Roadmap Sprint
+
 📍 Sprint 1 (Week 10–11)
 Setup Django project
 
@@ -142,21 +146,25 @@ Enhancement recommendation engine
 UAT & documentation
 
 ## 🧭 Known Issues
+
 ⚠ Tailwind CLI perlu environment Windows yang stabil
 ⚠ CV parsing masih dummy (prototype)
 ⚠ Hasil rekomendasi terbatas (early-stage model)
 
 ## 👥 Tim Pengembang MatchMyCV
-NIM	Nama	Role
-187231010	Adelia	Project Manager
-187231011	Cokorda Istri Trisna Shanti Maharani Pemayun	Research & UI Writer
-187231026	Muhammad Iqbal Rahmananda	Backend Developer
-187231051	Virgie Septia Ferdy	Data Engineer / Analyzer
-187231077	Raditya Nauval Ramadhan Putra Wibowo	Frontend Developer
+
+|NIM|	|Nama| |Role|
+|-------|----------|----------|
+|187231010|	|Adelia|	Project Manager|
+|187231011|	|Cokorda Istri Trisna Shanti Maharani Pemayun|	|Research & UI Writer|
+|187231026|	|Muhammad Iqbal Rahmananda|	|Backend Developer|
+|187231051|	|Virgie Septia Ferdy|	|Data Engineer / Analyzer|
+|187231077|	|Raditya Nauval Ramadhan Putra Wibowo|	|Frontend Developer|
 
 Tim berkolaborasi melalui GitHub, Figma, dan komunikasi rutin.
 
 ## 🛠️ Tools Lingkungan Pengembangan
+
 Tools	Kegunaan
 VSCode	Code Editor
 GitHub	Version Control
@@ -164,6 +172,7 @@ Figma	UI/UX Wireframing
 Postman	API Testing (fase lanjut)
 
 ## 🔐 Security Notes
+
 Tidak menyimpan data pengguna sensitif
 
 Tidak menyimpan berkas CV di server (development mode)
@@ -171,6 +180,7 @@ Tidak menyimpan berkas CV di server (development mode)
 Menggunakan hashing bawaan Django
 
 ## 🧬 Enhancement di Masa Depan
+
 Dukungan format DOCX
 
 Scoring ATS berbasis AI
@@ -182,6 +192,7 @@ Export laporan rekomendasi PDF
 Grafik skill radar chart
 
 ## 🤝 Kontribusi
+
 Pull Request dipersilakan:
 
 bash
