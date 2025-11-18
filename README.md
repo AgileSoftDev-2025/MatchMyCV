@@ -38,7 +38,7 @@ MatchMyCV adalah platform berbasis web yang membantu pengguna menganalisis Curri
 
 ## 🧱 Arsitektur Sistem (High Level)
 
-```mermaid
+
 flowchart TD
 A[User Upload CV] --> B[Django Backend]
 B --> C[NLP Parsing Module]
