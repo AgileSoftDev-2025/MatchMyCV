@@ -112,9 +112,9 @@ Register	/register/
 🧪 Status Pengembangan
 Status	Fase
 ✅ UI Template	Completed
-✅ Authentication	Completed
-🟡 CV Parsing Engine	In Progress
-🟡 Job Recommendation Engine	In Progress
+✅ Authentication
+✅ CV Parsing Engine	Completed
+✅ Job Recommendation Engine Completed
 🔜 Export PDF Result	Planned
 🔜 AI LLM Integration	Planned
 
