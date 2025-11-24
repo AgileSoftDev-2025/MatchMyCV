@@ -11,8 +11,6 @@ __pycache__/
 *.pyd
 *.sqlite3
 db.sqlite3
-media/
-staticfiles/
 *.log
 
 # IDE & OS files
@@ -43,3 +41,6 @@ htmlcov/
 
 # VSCode workspace cache
 .history/
+
+matchmycv_website/data/
+matchmycv_website/media/

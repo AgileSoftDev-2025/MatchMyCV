@@ -1,7 +1,59 @@
-{% extends "base.html" %}
-{% block title %}Beranda | MatchMyCV{% endblock %}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}FAQ · MatchMyCV{% endblock %}
+
 {% block content %}
-  <div class="p-5 bg-light rounded-3">
-    <h1 class="fw-bold">FAQ</h1>
+
+<section class="pt-24 pb-20 px-4 max-w-4xl mx-auto">
+  <div class="text-center mb-10">
+    <h1 class="text-3xl md:text-4xl font-extrabold text-[#2D63B0] mb-2">
+      Frequently Asked Questions
+    </h1>
+    <p class="text-slate-600 text-lg">
+      Find answers to common questions about MatchMyCV
+    </p>
   </div>
+
+  {% for item in faq_items %}
+    <div class="bg-[#BBD1EA] rounded-lg shadow-sm overflow-hidden mb-4">
+
+      <!-- BUTTON / PERTANYAAN -->
+      <button 
+        class="faq-toggle w-full flex justify-between items-center px-5 py-4 font-semibold text-slate-700 text-left hover:bg-[#a8c4dd] transition-colors"
+      >
+        <span>{{ item.question }}</span>
+
+        <img 
+          src="{% static 'images/chevron-up.png' %}" 
+          class="faq-icon w-5 h-5 transition-transform rotate-180"
+          alt="toggle icon"
+        />
+      </button>
+
+      <!-- JAWABAN -->
+      <div class="faq-content hidden px-5 pt-3 pb-3 bg-white">
+        <p class="text-slate-600 leading-relaxed">{{ item.answer }}</p>
+      </div>
+
+    </div>
+  {% endfor %}
+
+</section>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+  document.querySelectorAll(".faq-toggle").forEach(button => {
+    button.addEventListener("click", () => {
+      const content = button.nextElementSibling;
+      content.classList.toggle("hidden");
+
+      const icon = button.querySelector(".faq-icon");
+      icon.classList.toggle("rotate-180");
+    });
+  });
+</script>
 {% endblock %}

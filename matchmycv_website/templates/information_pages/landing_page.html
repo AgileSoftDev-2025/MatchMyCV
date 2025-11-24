@@ -1,9 +1,163 @@
 {% extends "base.html" %}
-{% block title %}Beranda | MatchMyCV{% endblock %}
-{% block content %}
-  <div class="p-5 bg-light rounded-3">
-    <p class="text-xl">Landing Page</p>
+{% load static %}
 
-    <p class="text-[50px] bg-black"> waa</p>
+{% block title %}Find the Right Job - MatchMyCV{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Animasi halus untuk elemen dekorasi background (floating) */
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+  .animate-float { animation: float 6s ease-in-out infinite; }
+  .animate-float-delayed { animation: float 7s ease-in-out infinite 2s; }
+  .animate-float-slow { animation: float 8s ease-in-out infinite 1s; }
+
+  /* styling untuk card icons */
+  .icon-card { width: 64px; height: 64px; object-fit: contain; display: block; margin: 0 auto; }
+
+  /* hero background wrapper */
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none; /* supaya tidak mengganggu klik */
+    z-index: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+  .hero-bg img {
+    max-width: 1200px; /* batasi ukuran agar proporsional */
+    width: 110%;
+    opacity: 0.28; /* transparansi agar teks mudah dibaca (naikkan bila perlu) */
+    transform: translateY(0px);
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  /* tingkatkan kontras teks di atas background */
+  .hero-content { position: relative; z-index: 10; }
+
+  /* responsif: sembunyikan bg dekoratif di layar kecil untuk performa */
+  @media (max-width: 1023px) {
+    .hero-bg img { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="relative overflow-hidden bg-[#eef6fc] pt-12 pb-20 lg:pt-24 lg:pb-32">
+  <div class="hero-bg" aria-hidden="true">
+    <img src="{% static 'images/background.png' %}" alt="Decorative background" class="animate-float-slow" loading="lazy">
   </div>
+
+  {# Gambar laptop yang diminta telah dihapus sepenuhnya dari sini #}
+
+  <div class="container mx-auto px-[5%] max-w-7xl relative z-10 hero-content">
+    <div class="flex flex-col items-center gap-10 lg:flex-row lg:gap-16">
+      
+      <div class="flex-1 text-center lg:text-left">
+        <h1 class="mb-6 text-4xl font-extrabold leading-[1.15] text-slate-950 lg:text-5xl xl:text-[3.5rem]">
+          Find the right job faster with <span class="text-[#2563eb]">MatchMyCV</span>
+        </h1>
+        <p class="mb-10 text-[17px] text-slate-500 leading-relaxed max-w-lg mx-auto lg:mx-0">
+          Upload your CV, let our system analyze your skills and experience, and get personalized job recommendations that truly match your profile.
+        </p>
+
+        {# conditional Start / Login button #}
+        {% if user.is_authenticated %}
+          <a href="/analisis-cv/" class="inline-block rounded-full bg-[#facc15] hover:bg-[#eab308] text-white text-lg font-bold px-12 py-3.5 shadow-[0_4px_14px_rgba(250,204,21,0.4)] transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#facc15]">
+            Start
+          </a>
+        {% else %}
+          <a href="/login/" class="inline-block rounded-full bg-[#facc15] hover:bg-[#eab308] text-white text-lg font-bold px-12 py-3.5 shadow-[0_4px_14px_rgba(250,204,21,0.4)] transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#facc15]">
+            Login
+          </a>
+        {% endif %}
+      </div>
+
+      <div class="flex-1 w-full max-w-[600px]">
+        <img 
+          src="{% static 'images/gambar-landing.png' %}" 
+          alt="Illustration: people and CV matching" 
+          class="w-full h-auto object-contain drop-shadow-lg"
+          loading="lazy"
+        >
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bg-white py-20 lg:py-28">
+  <div class="container mx-auto px-[5%] max-w-6xl">
+    <div class="text-center mb-16">
+      <h2 class="text-[36px] md:text-3xl font-bold text-[#2563eb] mb-3">Easy Steps</h2>
+      <p class="text-slate-500 text-[17px]">Follow three simple steps to find the best job matches quickly and easily.</p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+      <div class="p-8 bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] text-center">
+        <div class="mb-6">
+          <img src="{% static 'images/location.png' %}" alt="Icon choose location" class="icon-card" loading="lazy">
+        </div>
+        <h3 class="text-[19px] font-bold text-slate-900 mb-2">Choose Location</h3>
+        <p class="text-slate-500 leading-relaxed text-[15px]">Select your preferred<br>job location.</p>
+      </div>
+
+      <div class="p-8 bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] text-center">
+        <div class="mb-6">
+          <img src="{% static 'images/upload.png' %}" alt="Icon upload CV" class="icon-card" loading="lazy">
+        </div>
+        <h3 class="text-[19px] font-bold text-slate-900 mb-2">Upload CV</h3>
+        <p class="text-slate-500 leading-relaxed text-[15px]">Click the button to<br>upload your CV.</p>
+      </div>
+
+      <div class="p-8 bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] text-center">
+        <div class="mb-6">
+          <img src="{% static 'images/task-list.png' %}" alt="Icon see matches" class="icon-card" loading="lazy">
+        </div>
+        <h3 class="text-[19px] font-bold text-slate-900 mb-2">See Matches</h3>
+        <p class="text-slate-500 leading-relaxed text-[15px]">Get job vacancies that<br>fit your profile and location.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bg-white pb-20 lg:pb-32">
+  <div class="container mx-auto px-[5%] max-w-6xl">
+    <div class="text-center mb-16">
+      <h2 class="text-[36px] md:text-3xl font-bold text-[#2563eb] mb-3">Benefits</h2>
+      <p class="text-slate-500 text-[17px] max-w-2xl mx-auto">Discover how MatchMyCV helps you save time, get better matches, and boost your career.</p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+      <div class="p-8 bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] text-center">
+        <div class="mb-6 p-3 rounded-full">
+          <img src="{% static 'images/time-line.png' %}" alt="Icon save time" class="icon-card" loading="lazy">
+        </div>
+        <h3 class="text-[19px] font-bold text-slate-900 mb-2">Save Time</h3>
+        <p class="text-slate-500 leading-relaxed text-[15px]">Quick and focused job<br>matching.</p>
+      </div>
+
+      <div class="p-8 bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] text-center">
+        <div class="mb-6 p-3 rounded-full">
+          <img src="{% static 'images/solid_check.png' %}" alt="Icon better fit" class="icon-card" loading="lazy">
+        </div>
+        <h3 class="text-[19px] font-bold text-slate-900 mb-2">Better Fit</h3>
+        <p class="text-slate-500 leading-relaxed text-[15px]">Jobs matched to your<br>skills and location.</p>
+      </div>
+
+      <div class="p-8 bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] text-center">
+        <div class="mb-6 p-3 rounded-full">
+          <img src="{% static 'images/rocket-5.png' %}" alt="Icon boost career" class="icon-card" loading="lazy">
+        </div>
+        <h3 class="text-[19px] font-bold text-slate-900 mb-2">Boost Career</h3>
+        <p class="text-slate-500 leading-relaxed text-[15px]">Find the right<br>opportunities faster.</p>
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock %}
