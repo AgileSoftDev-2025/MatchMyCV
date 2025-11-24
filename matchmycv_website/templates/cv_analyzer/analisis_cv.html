@@ -33,6 +33,18 @@
     color: #059669; 
     font-weight: 600; 
   }
+  /* GIF styling for loading screen */
+  .loading-gif {
+    width: 10rem; /* 160px */
+    max-width: 40%;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  @media (min-width: 768px) {
+    .loading-gif { width: 12rem; }
+  }
 </style>
 {% endblock %}
 
@@ -100,6 +112,12 @@
         <h1 class="text-3xl font-extrabold text-[#2D63B0] mb-3">Analyzing CV</h1>
         <p class="text-slate-600 text-base" id="loading-filename">My CV.pdf (3.5 MB)</p>
       </div>
+
+      <!-- Animated GIF (place under static/images/loading.gif) -->
+      <div class="max-w-4xl mx-auto mb-8 text-center">
+        <img id="loading-gif" class="loading-gif" src="{% static 'images/loading.gif' %}" alt="Loading animation" />
+      </div>
+
       <div class="max-w-4xl mx-auto mb-8">
         <div class="bg-slate-200 rounded-full h-8 overflow-hidden">
           <div id="progress-bar" class="bg-blue-600 h-full rounded-full" style="width:0%"></div>
@@ -133,7 +151,8 @@
     progressPercent: document.getElementById('progress-percent'),
     progressStatus: document.getElementById('progress-status'),
     loadingFilename: document.getElementById('loading-filename'),
-    locationSelect: document.getElementById('location')
+    locationSelect: document.getElementById('location'),
+    loadingGif: document.getElementById('loading-gif')
   };
 
   let uploadedFile = null;
@@ -235,6 +254,9 @@
     els.formContainer.classList.add('hidden');
     els.loadingContainer.classList.remove('hidden');
 
+    // Ensure GIF is visible (if it exists) for better UX
+    if (els.loadingGif) els.loadingGif.style.display = 'block';
+
     const filesizeText = `${(uploadedFile.size / 1024 / 1024).toFixed(1)} MB`;
     els.loadingFilename.textContent = `${uploadedFile.name} (${filesizeText})`;
 
@@ -245,6 +267,11 @@
       if (progress > 90) progress = 90;
       els.progressBar.style.width = `${Math.floor(progress)}%`;
       els.progressPercent.textContent = `${Math.floor(progress)}%`;
+
+      // optional nice touch: update small status text while waiting
+      const statusPhrases = ['Parsing content...', 'Extracting skills...', 'Matching to jobs...', 'Finalizing results...'];
+      const idx = Math.min(Math.floor(progress / 25), statusPhrases.length - 1);
+      els.progressStatus.textContent = statusPhrases[idx];
     }, 300);
 
     const formData = new FormData();
@@ -268,10 +295,13 @@
         els.progressPercent.textContent = '100%';
         els.progressStatus.textContent = 'Analysis Complete!';
         
+        // Hide GIF once finished (keeps transition smooth)
+        if (els.loadingGif) els.loadingGif.style.display = 'none';
+
         // Store results
         sessionStorage.setItem('cv_analysis_results', JSON.stringify(result));
         
-        // Redirect after delay
+        // Redirect after short pause so user sees 100%
         setTimeout(() => {
           window.location.href = '/hasil-rekomendasi/';
         }, 600);

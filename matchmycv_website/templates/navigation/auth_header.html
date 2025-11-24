@@ -52,7 +52,7 @@
 
   <nav class="flex flex-col">
     <a href="/" class="px-4 py-3 rounded-md text-slate-500 hover:bg-slate-100">Home</a>
-    <a href="/analisis-cv" class="px-4 py-3 rounded-md text-slate-500 hover:bg-slate-100">Analyze CV</a>
+    <a href="/analisis-cv/" class="px-4 py-3 rounded-md text-slate-500 hover:bg-slate-100">Analyze CV</a>
     <a href="/tentang-kami" class="px-4 py-3 rounded-md text-slate-500 hover:bg-slate-100">About Us</a>
     <a href="/faq/" class="px-4 py-3 rounded-md text-slate-500 hover:bg-slate-100">FAQ</a>
     <a href="/logout/" class="px-4 py-3 rounded-md text-slate-500 hover:bg-slate-100">Logout</a>
@@ -77,10 +77,10 @@
     </div>
 
     <nav class="hidden md:flex items-center gap-7">
-      <a href="/" class="text-[15px] font-regular hover:font-medium active:font-medium text-slate-500 hover:text-blue-600">Home</a>
-      <a href="/analisis-cv" class="text-[15px] font-regular hover:font-medium active:font-medium text-slate-500 hover:text-blue-600">Analyze CV</a>
-      <a href="/tentang-kami/" class="text-[15px] font-regular hover:font-medium active:font-medium text-slate-500 hover:text-blue-600">About Us</a>
-      <a href="/faq/" class="text-[15px] font-regular hover:font-medium active:font-medium text-slate-500 hover:text-blue-600">FAQ</a>
+      <a href="/" class="text-[15px] font-regular hover:font-medium active:font-medium text-slate-500 hover:text-blue-600 active:text-blue-600">Home</a>
+      <a href="/analisis-cv/" class="text-[15px] font-regular hover:font-medium active:font-medium text-slate-500 hover:text-blue-600 active:text-blue-600">Analyze CV</a>
+      <a href="/tentang-kami/" class="text-[15px] font-regular hover:font-medium active:font-medium text-slate-500 hover:text-blue-600 active:text-blue-600">About Us</a>
+      <a href="/faq/" class="text-[15px] font-regular hover:font-medium active:font-medium text-slate-500 hover:text-blue-600 active:text-blue-600">FAQ</a>
       <div class="relative">
         <button id="user-menu-button"
                 class="w-9 h-9 grid place-items-center rounded-full border-2 border-slate-200 hover:bg-slate-50"
@@ -123,7 +123,6 @@
     </nav>
   </div>
 </header>
-
 <script>
   window.HeaderInit = function () {
     const sidebar = document.getElementById('sidebar');
@@ -160,8 +159,28 @@
 
     function norm(p){ return (p || '/').replace(/\/+$/,'/') || '/'; }
     const current = norm(window.location.pathname);
+
+    // Map principal href -> array of routes that should make it active.
+    // Tambah pasangan lain di sini bila perlu (key harus sama format trailing-slash).
+    const activeAliases = {
+      '/analisis-cv/': ['/analisis-cv/', '/hasil-rekomendasi/']
+    };
+
+    function linkMatches(href, cur) {
+      href = norm(href);
+      // langsung cocok
+      if (href === cur) return true;
+      // cocok jika current termasuk alias dari href
+      const aliases = activeAliases[href];
+      if (Array.isArray(aliases)) {
+        return aliases.some(a => norm(a) === cur);
+      }
+      return false;
+    }
+
     document.querySelectorAll('header a[href], aside a[href]').forEach(a => {
-      if (norm(a.getAttribute('href')) === current) {
+      const href = a.getAttribute('href');
+      if (linkMatches(href, current)) {
         a.classList.add('text-blue-600','font-bold');
         if (a.closest('aside')) a.classList.add('bg-slate-100');
       }
