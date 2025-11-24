@@ -40,9 +40,17 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+# urlpatterns = [
+#     path('admin/', admin.site.urls),
+#     path('', include('cv_analyzer.urls')),
+    
+# ]
+
 urlpatterns = [
+    path('', include('information_pages.urls')),
+     path('', include('cv_analyzer.urls')),
+    path('', include(('user_authentication.urls', 'user_authentication'), namespace='user_authentication')),
     path('admin/', admin.site.urls),
-    path('', include('cv_analyzer.urls')),
 ]
 
 # Serve media files in development

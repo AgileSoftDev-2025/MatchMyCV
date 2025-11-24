@@ -283,7 +283,13 @@
       jobContainer.innerHTML = jobs.map((job, index) => `
         <div class="flex flex-col overflow-hidden rounded-xl border border-slate-900/[.06] bg-white shadow-[0_4px_12px_rgba(2,6,23,0.08)] transition-shadow transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)]">
           <div class="relative h-[180px] overflow-hidden">
-            <img src="https://images.unsplash.com/photo-${1486406146926 + index}-c627a92ad1ab?w=400&h=300&fit=crop" alt="office" class="block h-full w-full object-cover">
+            <img 
+              src="https://images.unsplash.com/photo-${1486406146926 + index}-c627a92ad1ab?w=400&h=300&fit=crop"
+              onerror="this.onerror=null; this.src='{% static 'images/default-image.png' %}';"
+              alt="office"
+              class="block h-full w-full object-cover"
+            />
+
             <div class="absolute top-3 right-3 rounded-full bg-green-500 py-1.5 px-3.5 text-xs font-semibold text-white shadow-[0_2px_8px_rgba(34,197,94,0.3)]">Match: ${Math.round(job.similarity_score)}%</div>
           </div>
           <div class="flex flex-1 flex-col p-5">
