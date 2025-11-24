@@ -38,7 +38,7 @@ Feature: CV Analysis (MatchMyCV - Analyze CV)
     And I select "All Locations" from the "location" dropdown
     When I press "Upload CV" button
     Then I should see the modal "uploadCvModal"
-    When I upload the file "Pengenalan_PHP.pdf"
+    When I upload the file "CV_11MB.pdf"
     And the file size should be larger than 10MB
     Then I should see error message "Ukuran file melebihi batas maksimum (10MB)!"
     And the displayed filename should be "No file chosen"
