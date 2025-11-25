@@ -218,7 +218,6 @@
       els.fileInput.value = ''; // Reset input
       return;
     }
-  }
 
     // MIME type check
     const fileType = file.type || '';
@@ -345,12 +344,6 @@
           break;
         }
       }
-    } catch (error) {
-      clearInterval(interval);
-      alert('Error: ' + error.message);
-      els.pageHeader.classList.remove('hidden');
-      els.formContainer.classList.remove('hidden');
-      els.loadingContainer.classList.add('hidden');
     }
     return cookieValue;
   }
