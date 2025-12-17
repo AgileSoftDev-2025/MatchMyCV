@@ -313,7 +313,7 @@ def calculate_weighted_similarity(cv_data, df_jobs):
 
 def get_job_recommendations(cv_data, location, num_results=6):
     """Get job recommendations based on CV analysis"""
-    job_file_path = r'C:\Users\user\MatchMyCV\job_street_scrapper\data_csv\Job Evaluation Top 50.xlsx'
+    job_file_path = os.getenv("JOB_DATA_PATH", "job_street_scrapper/data_csv/Job Evaluation Top 50.xlsx")
     
     if not os.path.exists(job_file_path):
         raise FileNotFoundError(f"Job dataset not found at {job_file_path}")
