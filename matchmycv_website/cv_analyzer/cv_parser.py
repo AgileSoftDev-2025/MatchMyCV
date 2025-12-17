@@ -1,4 +1,4 @@
-import fitz  # PyMuPDF
+import fitz  
 import re
 import pandas as pd
 import torch
@@ -7,7 +7,6 @@ from sentence_transformers import SentenceTransformer, util
 from django.conf import settings
 import os
 
-# Global variables to store models (load once)
 _models_loaded = False
 _ner_general = None
 _ner_skill = None
@@ -46,7 +45,7 @@ def load_models():
     _model_embed = SentenceTransformer("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
     
     _models_loaded = True
-    print("✅ All models loaded successfully!")
+    print("All models loaded successfully!")
 
 
 JURUSAN_KEYWORDS = [
@@ -139,7 +138,7 @@ def find_universities(text):
 
 
 def extract_skills(full_text, skill_section_text):
-    """Extract skills from CV"""
+    """Extract skills from CV with improved token merging"""
     text_for_ner = skill_section_text if len(skill_section_text.strip()) > 5 else full_text
     ents_skill = safe_ner_call(_ner_skill, text_for_ner, _tokenizer_skill)
     
@@ -152,14 +151,62 @@ def extract_skills(full_text, skill_section_text):
                 w = normalize_skill(w)
                 detected.append(w.lower())
     
+    merged = []
+    i = 0
+    while i < len(detected):
+        current = detected[i]
+        
+        if i + 1 < len(detected):
+            next_token = detected[i + 1]
+            combined = current + next_token
+        
+            multi_token_skills = {
+                "tableau": ["table", "au", "tab", "leau"],
+                "figma": ["fig", "ma", "fi", "gma"],
+                "github": ["git", "hub"],
+                "mongodb": ["mongo", "db"],
+                "postgresql": ["postgre", "sql", "post"],
+                "javascript": ["java", "script"],
+                "powerpoint": ["power", "point"],
+            }
+            
+            matched = False
+            for skill_name, tokens in multi_token_skills.items():
+                if current in tokens and next_token in tokens:
+                    merged.append(skill_name)
+                    i += 2
+                    matched = True
+                    break
+            
+            if not matched:
+                merged.append(current)
+                i += 1
+        else:
+            merged.append(current)
+            i += 1
+    
+    detected = merged
+    partial_map = {
+        "table": "tableau",
+        "au": "tableau",
+        "tab": "tableau",
+        "fig": "figma",
+        "fi": "figma",
+        "gma": "figma",
+        "hub": "github",
+        "mongo": "mongodb",
+        "postgre": "postgresql",
+    }
+    
     detected = sorted(set(detected))
+    
     if detected:
         return detected
-    
-    # Fallback keywords
+
     fallback_keywords = [
         "python", "java", "sql", "excel", "word", "powerpoint", "html", "css",
         "javascript", "react", "tableau", "canva", "git", "linux", "docker",
+        "figma", "pandas", "numpy", "tensorflow", "vue", "angular", "nodejs"
     ]
     text_low = full_text.lower()
     fallback_found = [kw for kw in fallback_keywords if re.search(rf"\b{re.escape(kw)}\b", text_low)]
@@ -168,7 +215,7 @@ def extract_skills(full_text, skill_section_text):
 
 def parse_cv(pdf_path):
     """Main CV parsing function"""
-    load_models()  # Ensure models are loaded
+    load_models()  
     
     text = extract_text_pymupdf(pdf_path)
     sections = split_sections(text)
@@ -176,7 +223,6 @@ def parse_cv(pdf_path):
     skill_section = sections.get("skills", "")
     experience_section = sections.get("experience", "")
     
-    # Extract major/jurusan
     ents_major = safe_ner_call(_ner_major, education_section or text, _tokenizer_major)
     jurusan_candidates = [ent["word"].strip() for ent in ents_major if "LABEL_1" in ent["entity_group"]]
     jurusan = None
@@ -207,18 +253,15 @@ def parse_cv(pdf_path):
             chosen_uni = unis[-1][0]
     chosen_uni = re.sub(r"\s+", " ", chosen_uni).strip().title() if chosen_uni else "-"
     
-    # Combine education
     pendidikan_parts = []
     if chosen_uni and chosen_uni != "-":
         pendidikan_parts.append(chosen_uni)
     if jurusan and jurusan != "Tidak Terdeteksi" and jurusan.lower() not in (chosen_uni or "").lower():
         pendidikan_parts.append(jurusan)
     pendidikan_final = " - ".join(pendidikan_parts) if pendidikan_parts else "-"
-    
-    # Extract skills
+
     skills_list = extract_skills(text, skill_section)
     
-    # Extract experience
     pengalaman = []
     source_text = experience_section if len(experience_section.strip()) > 10 else text
     for sent in re.split(r"[.\n]", source_text):
@@ -236,7 +279,7 @@ def parse_cv(pdf_path):
 
 def calculate_weighted_similarity(cv_data, df_jobs):
     """Calculate weighted similarity between CV and jobs"""
-    load_models()  # Ensure models are loaded
+    load_models()  
     
     cv_text_weighted = " ".join([
         " ".join(cv_data.get("pengalaman", [])) * 2,  # 40%
@@ -270,23 +313,19 @@ def calculate_weighted_similarity(cv_data, df_jobs):
 
 def get_job_recommendations(cv_data, location, num_results=6):
     """Get job recommendations based on CV analysis"""
-    # Load job dataset
-    job_file_path = os.path.join(settings.BASE_DIR, 'data', 'data_jobstreet.xlsx')
+    job_file_path = r'C:\Users\user\MatchMyCV\job_street_scrapper\data_csv\jobs_data_jobstreet(2025-11-28 2383).xlsx'
     
     if not os.path.exists(job_file_path):
         raise FileNotFoundError(f"Job dataset not found at {job_file_path}")
     
     df_jobs = pd.read_excel(job_file_path)
     
-    # Add location to cv_data
     cv_data["lokasi"] = location
     
-    # Calculate similarities
     weighted_scores = calculate_weighted_similarity(cv_data, df_jobs)
     df_jobs["Similarity_Score"] = weighted_scores.cpu().numpy()
     df_jobs_sorted = df_jobs.sort_values(by="Similarity_Score", ascending=False)
     
-    # Filter by location
     if location.lower() != "all":
         df_lokasi_cocok = df_jobs_sorted[
             df_jobs_sorted["location"].str.lower().str.contains(location.lower(), na=False)
