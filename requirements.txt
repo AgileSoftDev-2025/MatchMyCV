@@ -6,3 +6,5 @@ torch
 sentence-transformers
 scikit-learn
 openpyxl
+fitz
+numpy
