@@ -2,12 +2,12 @@
 
 **MatchMyCV** adalah platform berbasis web yang membantu pengguna menganalisis *Curriculum Vitae (CV)* secara otomatis dan memberikan rekomendasi pekerjaan yang relevan berdasarkan isi CV (keahlian, pengalaman, pendidikan) serta preferensi lokasi pengguna.
 
-Proyek ini menggunakan *Natural Language Processing (NLP)* dengan model **IndoBERT** dan **Cosine Similarity** untuk mencocokkan makna semantik antara CV dan deskripsi pekerjaan.
+Proyek ini menggunakan *Natural Language Processing (NLP)* dengan model **BERT** dan **Cosine Similarity** untuk mencocokkan makna semantik antara CV dan deskripsi pekerjaan.
 
 ---
 
 ## 🎯 Tujuan Proyek
-- Mengembangkan sistem rekomendasi kerja berbasis IndoBERT dan Cosine Similarity.  
+- Mengembangkan sistem rekomendasi kerja berbasis BERT dan Cosine Similarity.  
 - Membantu pengguna menemukan lowongan kerja yang relevan dengan CV mereka.  
 - Mengatasi keterbatasan sistem pencarian kerja berbasis kata kunci (*keyword matching*).  
 - Mengoptimalkan proses pencarian kerja agar lebih cepat, efisien, dan akurat.  
@@ -20,10 +20,8 @@ Proyek ini menggunakan *Natural Language Processing (NLP)* dengan model **IndoBE
    - Sistem menganalisis *skills*, *education*, dan *experience* menggunakan NLP.  
    - Hasil rekomendasi diambil dari hasil *scraping* situs JobStreet.  
 
-2. **Upload CV Format PDF (Multi-Language)**  
-   - Mendukung CV dalam berbagai bahasa (Indonesia & Inggris).  
-
 3. **Sistem Autentikasi Pengguna (Login & Register)**  
+   - Pengguna dapat membuat akun untuk mengakses fitur analisis CV
    - Menggunakan Django Authentication.  
 
 4. **Antarmuka Modern & Responsif**  
